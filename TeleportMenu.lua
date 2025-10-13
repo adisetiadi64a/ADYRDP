@@ -1,40 +1,14 @@
--- 🧭 Ady Hub - Teleport Menu (Ash-Libs Version)
+-- 🧭 Ady Hub - Teleport Menu (Per-Gunung Tabs)
 -- By Ady & ChatGPT
--- Menggunakan framework Ash-Libs, bukan Instance bawaan Roblox
-
 repeat task.wait() until game and game:IsLoaded()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- 🔧 Load GUI Framework Ash-Libs
+-- 🔧 Load Ash-Libs Framework
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
 
 -------------------------------------------------
--- 🏠 Setup Window (kalau belum ada)
--------------------------------------------------
-local window = GUI:CreateMain({
-    Name = "Ady",
-    title = "Ady HUB",
-    ToggleUI = "K",
-    WindowIcon = "home",
-    Theme = {
-        Background = Color3.fromRGB(25, 25, 35),
-        Secondary = Color3.fromRGB(35, 35, 45),
-        Accent = Color3.fromRGB(138, 43, 226),
-        Text = Color3.fromRGB(255, 255, 255),
-        TextSecondary = Color3.fromRGB(180, 180, 180),
-        Border = Color3.fromRGB(50, 50, 60),
-        NavBackground = Color3.fromRGB(20, 20, 30)
-    }
-})
-
--------------------------------------------------
--- ⛰️ Tab Gunung
--------------------------------------------------
-local gunungTab = GUI:CreateTab("Gunung", "mountain")
-
--------------------------------------------------
--- ⚙️ Fungsi Teleport
+-- ⚙️ Teleport Helper
 -------------------------------------------------
 local function teleportTo(pos, label)
     local char = player.Character
@@ -46,18 +20,19 @@ local function teleportTo(pos, label)
         })
     else
         GUI:CreateNotify({
-            title = "⚠️ Gagal Teleport",
+            title = "⚠️ Gagal",
             description = "Karakter tidak ditemukan!"
         })
     end
 end
 
 -------------------------------------------------
--- 🏔️ Gunung Sumbing
+-- 🏔️ Tab: Gunung Sumbing
 -------------------------------------------------
-GUI:CreateSection({ parent = gunungTab, text = "Gunung Sumbing" })
+local sumbingTab = GUI:CreateTab("Sumbing", "mountain")
+GUI:CreateSection({ parent = sumbingTab, text = "Gunung Sumbing" })
 
-local gunungSumbing = {
+local sumbing = {
     { name = "Awal",   pos = Vector3.new(-391.71, 5.01, 245.32) },
     { name = "cp1",    pos = Vector3.new(-376.50, 425.01, 2182.94) },
     { name = "cp2",    pos = Vector3.new(-368.54, 830.67, 3123.00) },
@@ -65,9 +40,9 @@ local gunungSumbing = {
     { name = "cp5",    pos = Vector3.new(-989.67, 1896.13, 5426.57) },
 }
 
-for _, point in ipairs(gunungSumbing) do
+for _, point in ipairs(sumbing) do
     GUI:CreateButton({
-        parent = gunungTab,
+        parent = sumbingTab,
         text = "➡️ " .. point.name,
         callback = function()
             teleportTo(point.pos, "Gunung Sumbing - " .. point.name)
@@ -76,11 +51,12 @@ for _, point in ipairs(gunungSumbing) do
 end
 
 -------------------------------------------------
--- 🌋 Gunung Kawai
+-- 🌋 Tab: Gunung Kawai
 -------------------------------------------------
-GUI:CreateSection({ parent = gunungTab, text = "Gunung Kawai" })
+local kawaiTab = GUI:CreateTab("Kawai", "mountain")
+GUI:CreateSection({ parent = kawaiTab, text = "Gunung Kawai" })
 
-local gunungKawai = {
+local kawai = {
     { name = "cp1", pos = Vector3.new(275.65, 84.73, 247.94) },
     { name = "cp3", pos = Vector3.new(1200.37, 273.29, 293.01) },
     { name = "cp5", pos = Vector3.new(1819.28, 325.01, -7.08) },
@@ -88,9 +64,9 @@ local gunungKawai = {
     { name = "finish", pos = Vector3.new(5139.54, 1147.29, 4713.37) },
 }
 
-for _, point in ipairs(gunungKawai) do
+for _, point in ipairs(kawai) do
     GUI:CreateButton({
-        parent = gunungTab,
+        parent = kawaiTab,
         text = "➡️ " .. point.name,
         callback = function()
             teleportTo(point.pos, "Gunung Kawai - " .. point.name)
@@ -99,20 +75,21 @@ for _, point in ipairs(gunungKawai) do
 end
 
 -------------------------------------------------
--- 🌄 Gunung Rindara
+-- 🌄 Tab: Gunung Rindara
 -------------------------------------------------
-GUI:CreateSection({ parent = gunungTab, text = "Gunung Rindara" })
+local rindaraTab = GUI:CreateTab("Rindara", "mountain")
+GUI:CreateSection({ parent = rindaraTab, text = "Gunung Rindara" })
 
-local gunungRindara = {
+local rindara = {
     { name = "cp1", pos = Vector3.new(-6.942, 68.008, -45.782) },
     { name = "cp5", pos = Vector3.new(-612.847, 219.089, -1331.625) },
     { name = "cp10", pos = Vector3.new(-629.122, 362.349, -4072.554) },
     { name = "finish", pos = Vector3.new(1744.773, 1104.645, -5026.188) },
 }
 
-for _, point in ipairs(gunungRindara) do
+for _, point in ipairs(rindara) do
     GUI:CreateButton({
-        parent = gunungTab,
+        parent = rindaraTab,
         text = "➡️ " .. point.name,
         callback = function()
             teleportTo(point.pos, "Gunung Rindara - " .. point.name)
@@ -121,16 +98,17 @@ for _, point in ipairs(gunungRindara) do
 end
 
 -------------------------------------------------
--- 🔔 Info
+-- ℹ️ Info Tab
 -------------------------------------------------
-GUI:CreateSection({ parent = gunungTab, text = "Info" })
+local infoTab = GUI:CreateTab("Info", "info")
+GUI:CreateSection({ parent = infoTab, text = "Teleport Menu Info" })
 GUI:CreateButton({
-    parent = gunungTab,
-    text = "ℹ️ Tentang Menu Ini",
+    parent = infoTab,
+    text = "Tentang Menu Ini",
     callback = function()
         GUI:CreateNotify({
             title = "Teleport Menu",
-            description = "Versi Ash-Libs. Tersedia 3 gunung: Sumbing, Kawai, Rindara."
+            description = "Versi Ash-Libs (Per-Gunung Tab) — Sumbing, Kawai, Rindara"
         })
     end
 })
