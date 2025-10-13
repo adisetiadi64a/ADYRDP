@@ -1,5 +1,6 @@
--- 🧭 Ady Hub - Teleport Menu (Per-Gunung Tabs)
+-- 🧭 Ady Hub - Teleport Menu (Per-Gunung Tabs / Ash-Libs)
 -- By Ady & ChatGPT
+
 repeat task.wait() until game and game:IsLoaded()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -8,7 +9,7 @@ local player = Players.LocalPlayer
 local GUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/BloodLetters/Ash-Libs/refs/heads/main/source.lua"))()
 
 -------------------------------------------------
--- ⚙️ Teleport Helper
+-- ⚙️ Fungsi Teleport
 -------------------------------------------------
 local function teleportTo(pos, label)
     local char = player.Character
@@ -20,14 +21,14 @@ local function teleportTo(pos, label)
         })
     else
         GUI:CreateNotify({
-            title = "⚠️ Gagal",
+            title = "⚠️ Gagal Teleport",
             description = "Karakter tidak ditemukan!"
         })
     end
 end
 
 -------------------------------------------------
--- 🏔️ Tab: Gunung Sumbing
+-- 🏔️ TAB GUNUNG SUMBING
 -------------------------------------------------
 local sumbingTab = GUI:CreateTab("Sumbing", "mountain")
 GUI:CreateSection({ parent = sumbingTab, text = "Gunung Sumbing" })
@@ -51,7 +52,7 @@ for _, point in ipairs(sumbing) do
 end
 
 -------------------------------------------------
--- 🌋 Tab: Gunung Kawai
+-- 🌋 TAB GUNUNG KAWAI
 -------------------------------------------------
 local kawaiTab = GUI:CreateTab("Kawai", "mountain")
 GUI:CreateSection({ parent = kawaiTab, text = "Gunung Kawai" })
@@ -75,7 +76,7 @@ for _, point in ipairs(kawai) do
 end
 
 -------------------------------------------------
--- 🌄 Tab: Gunung Rindara
+-- 🌄 TAB GUNUNG RINDARA
 -------------------------------------------------
 local rindaraTab = GUI:CreateTab("Rindara", "mountain")
 GUI:CreateSection({ parent = rindaraTab, text = "Gunung Rindara" })
@@ -98,17 +99,17 @@ for _, point in ipairs(rindara) do
 end
 
 -------------------------------------------------
--- ℹ️ Info Tab
+-- ℹ️ TAB INFO
 -------------------------------------------------
 local infoTab = GUI:CreateTab("Info", "info")
-GUI:CreateSection({ parent = infoTab, text = "Teleport Menu Info" })
+GUI:CreateSection({ parent = infoTab, text = "Tentang Teleport Menu" })
 GUI:CreateButton({
     parent = infoTab,
-    text = "Tentang Menu Ini",
+    text = "ℹ️ Informasi",
     callback = function()
         GUI:CreateNotify({
             title = "Teleport Menu",
-            description = "Versi Ash-Libs (Per-Gunung Tab) — Sumbing, Kawai, Rindara"
+            description = "Versi Ash-Libs per-gunung tab. Termasuk Sumbing, Kawai, Rindara."
         })
     end
 })
