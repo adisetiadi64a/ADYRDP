@@ -244,123 +244,6 @@ local function addFeature(name, onToggle)
 	table.insert(featureList, {btn = btn, toggle = onToggle})
 end
 
--------------------------------------------------
--- 🎣 Fish It Feature (Submenu)
--------------------------------------------------
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
--- safe remote getter
-local function safeGet(name)
-    local ok, v = pcall(function()
-        return ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net[name]
-    end)
-    return ok and v or nil
-end
-
--- remotes
-local REFishingCompleted = safeGet("RE/FishingCompleted")
-local RFEquipOxygenTank = safeGet("RF/EquipOxygenTank")
-local RFUpdateFishingRadar = safeGet("RF/UpdateFishingRadar")
-
--- buat popup frame
-local fishFrame = Instance.new("Frame", gui)
-fishFrame.Size = UDim2.new(0, 200, 0, 200)
-fishFrame.Position = UDim2.new(0.5, -100, 0.5, -100)
-fishFrame.BackgroundColor3 = Color3.fromRGB(28,28,28)
-fishFrame.Visible = false
-fishFrame.Active = true
-fishFrame.Draggable = true
-Instance.new("UICorner", fishFrame).CornerRadius = UDim.new(0, 10)
-
-local fishTitle = Instance.new("TextLabel", fishFrame)
-fishTitle.Size = UDim2.new(1, -20, 0, 30)
-fishTitle.Position = UDim2.new(0, 10, 0, 6)
-fishTitle.BackgroundTransparency = 1
-fishTitle.Text = "🎣 Fish It Menu"
-fishTitle.Font = Enum.Font.GothamBold
-fishTitle.TextSize = 14
-fishTitle.TextColor3 = Color3.new(1,1,1)
-fishTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local closeFish = Instance.new("TextButton", fishFrame)
-closeFish.Size = UDim2.new(0, 26, 0, 26)
-closeFish.Position = UDim2.new(1, -34, 0, 6)
-closeFish.BackgroundColor3 = Color3.fromRGB(170,40,40)
-closeFish.Text = "X"
-closeFish.Font = Enum.Font.GothamBold
-closeFish.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", closeFish).CornerRadius = UDim.new(0, 6)
-closeFish.MouseButton1Click:Connect(function()
-    fishFrame.Visible = false
-end)
-
--- fungsi pembuat tombol kecil
-local function makeFishBtn(text, orderY, callback)
-    local btn = Instance.new("TextButton", fishFrame)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = UDim2.new(0.05, 0, 0, 40 + (orderY * 40))
-    btn.BackgroundColor3 = Color3.fromRGB(150,0,0)
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextScaled = true
-    btn.Text = text .. " [OFF]"
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
-
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        callback(state)
-        if state then
-            btn.BackgroundColor3 = Color3.fromRGB(0,150,0)
-            btn.Text = text .. " [ON]"
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(150,0,0)
-            btn.Text = text .. " [OFF]"
-        end
-    end)
-    return btn
-end
-
--------------------------------------------------
--- ⚡ Fast Fishing
--------------------------------------------------
-local fastFishingEnabled = false
-makeFishBtn("⚡ Fast Fishing", 0, function(state)
-    fastFishingEnabled = state
-end)
-
-task.spawn(function()
-    while task.wait(0.1) do
-        if fastFishingEnabled and REFishingCompleted then
-            pcall(function()
-                REFishingCompleted:FireServer()
-            end)
-        end
-    end
-end)
-
--------------------------------------------------
--- 🤿 Diving Gear
--------------------------------------------------
-makeFishBtn("🤿 Diving Gear", 1, function(state)
-    if state and RFEquipOxygenTank then
-        pcall(function()
-            RFEquipOxygenTank:InvokeServer(105)
-        end)
-    end
-end)
-
--------------------------------------------------
--- 📡 Radar
--------------------------------------------------
-makeFishBtn("📡 Radar", 2, function(state)
-    if RFUpdateFishingRadar then
-        pcall(function()
-            RFUpdateFishingRadar:InvokeServer(state)
-        end)
-    end
-end)
-
 
 
 -------------------------------------------------
@@ -379,7 +262,9 @@ addFeature("👁️ ESP", function(state)
 end)
 
 addFeature("🎣 Fish It", function(state)
-    fishFrame.Visible = state
+    if state then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/FishIt.lua"))()
+    end
 end)
 
 -------------------------------------------------
@@ -1105,4 +990,5 @@ game.StarterGui:SetCore("SendNotification", {
 -- end)
 --
 -- Semua fitur akan otomatis muncul di menu dengan gaya dan warna yang sama.
+
 -- Tombol akan menyesuaikan urutan berdasarkan urutan kamu menulis addFeature().
