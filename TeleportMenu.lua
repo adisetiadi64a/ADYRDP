@@ -12,7 +12,6 @@ local GUI = AshLibs:CreateMain({
     title = "Ady Hub - Teleport Menu",
     icon = "mountain"
 })
--- ⬆️ ini WAJIB supaya window-nya muncul
 
 -------------------------------------------------
 -- ⚙️ Fungsi Teleport
@@ -21,12 +20,12 @@ local function teleportTo(pos, label)
     local char = player.Character
     if char and char:FindFirstChild("HumanoidRootPart") then
         char:MoveTo(pos)
-        AshLibs:CreateNotify({
+        GUI:CreateNotify({
             title = "✅ Teleport",
             description = "Berhasil ke " .. label
         })
     else
-        AshLibs:CreateNotify({
+        GUI:CreateNotify({
             title = "⚠️ Gagal Teleport",
             description = "Karakter tidak ditemukan!"
         })
@@ -37,7 +36,7 @@ end
 -- 🏔️ TAB: Gunung Sumbing
 -------------------------------------------------
 local sumbingTab = GUI:CreateTab("Sumbing", "mountain")
-AshLibs:CreateSection({ parent = sumbingTab, text = "Gunung Sumbing" })
+GUI:CreateSection({ parent = sumbingTab, text = "Gunung Sumbing" })
 
 local sumbing = {
     { name = "Awal",   pos = Vector3.new(-391.71, 5.01, 245.32) },
@@ -48,7 +47,7 @@ local sumbing = {
 }
 
 for _, point in ipairs(sumbing) do
-    AshLibs:CreateButton({
+    GUI:CreateButton({
         parent = sumbingTab,
         text = "➡️ " .. point.name,
         callback = function()
@@ -61,7 +60,7 @@ end
 -- 🌋 TAB: Gunung Kawai
 -------------------------------------------------
 local kawaiTab = GUI:CreateTab("Kawai", "mountain")
-AshLibs:CreateSection({ parent = kawaiTab, text = "Gunung Kawai" })
+GUI:CreateSection({ parent = kawaiTab, text = "Gunung Kawai" })
 
 local kawai = {
     { name = "cp1", pos = Vector3.new(275.65, 84.73, 247.94) },
@@ -72,7 +71,7 @@ local kawai = {
 }
 
 for _, point in ipairs(kawai) do
-    AshLibs:CreateButton({
+    GUI:CreateButton({
         parent = kawaiTab,
         text = "➡️ " .. point.name,
         callback = function()
@@ -85,7 +84,7 @@ end
 -- 🌄 TAB: Gunung Rindara
 -------------------------------------------------
 local rindaraTab = GUI:CreateTab("Rindara", "mountain")
-AshLibs:CreateSection({ parent = rindaraTab, text = "Gunung Rindara" })
+GUI:CreateSection({ parent = rindaraTab, text = "Gunung Rindara" })
 
 local rindara = {
     { name = "cp1", pos = Vector3.new(-6.942, 68.008, -45.782) },
@@ -95,7 +94,7 @@ local rindara = {
 }
 
 for _, point in ipairs(rindara) do
-    AshLibs:CreateButton({
+    GUI:CreateButton({
         parent = rindaraTab,
         text = "➡️ " .. point.name,
         callback = function()
@@ -108,12 +107,12 @@ end
 -- ℹ️ TAB: Info
 -------------------------------------------------
 local infoTab = GUI:CreateTab("Info", "info")
-AshLibs:CreateSection({ parent = infoTab, text = "Teleport Menu Info" })
-AshLibs:CreateButton({
+GUI:CreateSection({ parent = infoTab, text = "Teleport Menu Info" })
+GUI:CreateButton({
     parent = infoTab,
     text = "ℹ️ Tentang Menu Ini",
     callback = function()
-        AshLibs:CreateNotify({
+        GUI:CreateNotify({
             title = "Teleport Menu",
             description = "Versi standalone gaya Ash-Libs.\nGunung: Sumbing, Kawai, Rindara."
         })
