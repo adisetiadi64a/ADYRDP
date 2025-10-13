@@ -1,10 +1,10 @@
-
--- 🧭 Ady Hub - Compact Teleport Box (Full list from list gunung.txt)
--- Compact + Collapse + Auto Teleport + Start CP + Delay
--- Generated for user
+-- 🧭 Ady Hub - Teleport Box (Reworked, full data, no collapse + multi-box system)
+-- Each mountain opens its own CP box window. Multi-window supported.
+-- Includes "Close All Boxes" control.
+-- Generated for user (full list from original TeleportBox_Final.txt)
 
 if game.CoreGui:FindFirstChild("TeleportBox") then
-	game.CoreGui.TeleportBox:Destroy()
+    game.CoreGui.TeleportBox:Destroy()
 end
 
 local gui = Instance.new("ScreenGui")
@@ -12,10 +12,10 @@ gui.Name = "TeleportBox"
 gui.ResetOnSpawn = false
 gui.Parent = game:GetService("CoreGui")
 
--- Frame utama (compact)
+-- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 300, 0, 380)
-main.Position = UDim2.new(0.5, -150, 0.5, -190)
+main.Size = UDim2.new(0, 300, 0, 420)
+main.Position = UDim2.new(0.5, -150, 0.5, -210)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Active = true
@@ -51,9 +51,9 @@ close.TextSize = 14
 close.Parent = header
 close.MouseButton1Click:Connect(function() gui:Destroy() end)
 
--- Scroll area
+-- Scroll Area
 local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1, -10, 1, -44)
+scroll.Size = UDim2.new(1, -10, 1, -64)
 scroll.Position = UDim2.new(0, 5, 0, 40)
 scroll.BackgroundTransparency = 1
 scroll.ScrollBarThickness = 6
@@ -64,7 +64,7 @@ local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 4)
 layout.Parent = scroll
 
--- CONFIG: teleportData (imported)
+-- CONFIG: teleportData (full list from original)
 local teleportData = {
 ["Gunung Prambanan"] = {
 		icon = "⛰️",
@@ -193,7 +193,7 @@ Vector3.new(-478.91, 710.34, -409.71) },
 			{ name = "finish", pos = Vector3.new(-3337.460, 1424.834, 2207.007) },
 		}
 	},
-	
+
 	["Gunung Rindara"] = {
 		icon = "🌄",
 		points = {
@@ -238,188 +238,243 @@ Vector3.new(-478.91, 710.34, -409.71) },
 	},
 }
 
-
 -- teleport function
 local player = game:GetService("Players").LocalPlayer
 local function teleportTo(pos, label)
-	local char = player.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		char:MoveTo(pos)
-		pcall(function()
-			game.StarterGui:SetCore("SendNotification", {
-				Title = "✅ Teleport",
-				Text = "Berhasil ke " .. label,
-				Duration = 2
-			})
-		end)
-	else
-		pcall(function()
-			game.StarterGui:SetCore("SendNotification", {
-				Title = "⚠️ Gagal Teleport",
-				Text = "Karakter tidak ditemukan!",
-				Duration = 2
-			})
-		end)
-	end
+    local char = player.Character
+    if char and char:FindFirstChild("HumanoidRootPart") then
+        char:MoveTo(pos)
+        pcall(function()
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "✅ Teleport",
+                Text = "Berhasil ke " .. label,
+                Duration = 2
+            })
+        end)
+    else
+        pcall(function()
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "⚠️ Gagal Teleport",
+                Text = "Karakter tidak ditemukan!",
+                Duration = 2
+            })
+        end)
+    end
 end
 
--- Global controls (compact)
-local cfgFrame = Instance.new("Frame")
-cfgFrame.Size = UDim2.new(1, -10, 0, 56)
-cfgFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-cfgFrame.BorderSizePixel = 0
-cfgFrame.Parent = scroll
+-- All CP boxes tracking
+local openBoxes = {}
 
-local delayBox = Instance.new("TextBox")
-delayBox.Size = UDim2.new(0, 70, 0, 24)
-delayBox.Position = UDim2.new(0, 8, 0, 8)
-delayBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-delayBox.TextColor3 = Color3.new(1, 1, 1)
-delayBox.Font = Enum.Font.GothamBold
-delayBox.Text = "5"
-delayBox.TextSize = 13
-delayBox.ClearTextOnFocus = false
-delayBox.Parent = cfgFrame
+-- Close All button
+local closeAllBtn = Instance.new("TextButton")
+closeAllBtn.Size = UDim2.new(1, -10, 0, 26)
+closeAllBtn.BackgroundColor3 = Color3.fromRGB(80, 30, 30)
+closeAllBtn.Text = "❌ Close All CP Boxes"
+closeAllBtn.TextColor3 = Color3.new(1,1,1)
+closeAllBtn.Font = Enum.Font.GothamBold
+closeAllBtn.TextSize = 13
+closeAllBtn.Parent = scroll
+closeAllBtn.MouseButton1Click:Connect(function()
+    for i = #openBoxes, 1, -1 do
+        local box = openBoxes[i]
+        if box and box.Parent then box:Destroy() end
+        table.remove(openBoxes, i)
+    end
+end)
 
-local delayLabel = Instance.new("TextLabel")
-delayLabel.Size = UDim2.new(0, 110, 0, 24)
-delayLabel.Position = UDim2.new(0, 86, 0, 8)
-delayLabel.BackgroundTransparency = 1
-delayLabel.Text = "Delay (1-60s)"
-delayLabel.TextColor3 = Color3.new(1, 1, 1)
-delayLabel.Font = Enum.Font.Gotham
-delayLabel.TextSize = 13
-delayLabel.Parent = cfgFrame
-
-local startBox = Instance.new("TextBox")
-startBox.Size = UDim2.new(0, 70, 0, 24)
-startBox.Position = UDim2.new(0, 8, 0, 32)
-startBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-startBox.TextColor3 = Color3.new(1, 1, 1)
-startBox.Font = Enum.Font.GothamBold
-startBox.Text = "1"
-startBox.TextSize = 13
-startBox.ClearTextOnFocus = false
-startBox.Parent = cfgFrame
-
-local startLabel = Instance.new("TextLabel")
-startLabel.Size = UDim2.new(0, 110, 0, 24)
-startLabel.Position = UDim2.new(0, 86, 0, 32)
-startLabel.BackgroundTransparency = 1
-startLabel.Text = "Start CP (number)"
-startLabel.TextColor3 = Color3.new(1, 1, 1)
-startLabel.Font = Enum.Font.Gotham
-startLabel.TextSize = 13
-startLabel.Parent = cfgFrame
-
--- Build UI: for each gunung, collapsible list
+-- Build UI: each gunung button opens separate box
 for gunungName, data in pairs(teleportData) do
-	local collapsed = false
-	local buttons = {}
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 26)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.Text = (data.icon or "") .. " " .. gunungName
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
+    btn.Parent = scroll
 
-	local headerBtn = Instance.new("TextButton")
-	headerBtn.Size = UDim2.new(1, -10, 0, 26)
-	headerBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	headerBtn.Text = (data.icon or "") .. " " .. gunungName .. " ▼"
-	headerBtn.TextColor3 = Color3.new(1,1,1)
-	headerBtn.Font = Enum.Font.GothamBold
-	headerBtn.TextSize = 13
-	headerBtn.Parent = scroll
+    btn.MouseButton1Click:Connect(function()
+        -- create new CP window
+        local box = Instance.new("Frame")
+        box.Size = UDim2.new(0, 260, 0, 420)
+        box.Position = UDim2.new(0.5, -130, 0.5, -190)
+        box.BackgroundColor3 = Color3.fromRGB(30,30,30)
+        box.BorderSizePixel = 0
+        box.Active = true
+        box.Draggable = true
+        box.Parent = gui
 
-	local autoBtn = Instance.new("TextButton")
-	autoBtn.Size = UDim2.new(0, 140, 0, 22)
-	autoBtn.Position = UDim2.new(1, -150, 0, 0)
-	autoBtn.AnchorPoint = Vector2.new(1, 0)
-	autoBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
-	autoBtn.Text = "▶️ Auto"
-	autoBtn.TextColor3 = Color3.new(1,1,1)
-	autoBtn.Font = Enum.Font.GothamBold
-	autoBtn.TextSize = 12
-	autoBtn.Visible = false
-	autoBtn.Parent = scroll
+        table.insert(openBoxes, box)
 
-	local running = false
-	autoBtn.MouseButton1Click:Connect(function()
-		if running then
-			running = false
-			autoBtn.Text = "▶️ Auto"
-			return
-		end
-		running = true
-		autoBtn.Text = "⏸️ Stop"
-		local delayTime = math.clamp(tonumber(delayBox.Text) or 5, 1, 60)
-		local startIndex = math.max(1, tonumber(startBox.Text) or 1)
-		spawn(function()
-			while running do
-				for i = startIndex, #data.points do
-					if not running then break end
-					local p = data.points[i]
-					teleportTo(p.pos, gunungName .. " - " .. p.name)
-					task.wait(delayTime)
-				end
-				-- stop after one loop to avoid infinite unless user restarts
-				running = false
-				autoBtn.Text = "▶️ Auto"
-			end
-		end)
-	end)
+        local boxHeader = Instance.new("Frame")
+        boxHeader.Size = UDim2.new(1, 0, 0, 30)
+        boxHeader.BackgroundColor3 = Color3.fromRGB(45,45,45)
+        boxHeader.BorderSizePixel = 0
+        boxHeader.Parent = box
 
-	headerBtn.MouseButton1Click:Connect(function()
-	collapsed = not collapsed
-	headerBtn.Text = (data.icon or "") .. " " .. gunungName .. (collapsed and " ▼" or " ▲")
-	autoBtn.Visible = not collapsed
+        local boxTitle = Instance.new("TextLabel")
+        boxTitle.Size = UDim2.new(1, -30, 1, 0)
+        boxTitle.Position = UDim2.new(0, 8, 0, 0)
+        boxTitle.BackgroundTransparency = 1
+        boxTitle.Text = (data.icon or "") .. " " .. gunungName
+        boxTitle.TextColor3 = Color3.new(1,1,1)
+        boxTitle.Font = Enum.Font.GothamBold
+        boxTitle.TextSize = 14
+        boxTitle.TextXAlignment = Enum.TextXAlignment.Left
+        boxTitle.Parent = boxHeader
 
-	-- buat container khusus buat tombol CP gunung ini
-	if not data.section then
-		data.section = Instance.new("Frame")
-		data.section.Size = UDim2.new(1, -10, 0, 0)
-		data.section.BackgroundTransparency = 1
-		data.section.AutomaticSize = Enum.AutomaticSize.Y
-		data.section.Parent = scroll
+        local closeBtn = Instance.new("TextButton")
+        closeBtn.Size = UDim2.new(0, 30, 1, 0)
+        closeBtn.Position = UDim2.new(1, -30, 0, 0)
+        closeBtn.BackgroundColor3 = Color3.fromRGB(150,50,50)
+        closeBtn.Text = "X"
+        closeBtn.TextColor3 = Color3.new(1,1,1)
+        closeBtn.Font = Enum.Font.GothamBold
+        closeBtn.TextSize = 14
+        closeBtn.Parent = boxHeader
+        closeBtn.MouseButton1Click:Connect(function()
+            -- remove from openBoxes
+            for i = #openBoxes, 1, -1 do
+                if openBoxes[i] == box then
+                    table.remove(openBoxes, i)
+                    break
+                end
+            end
+            box:Destroy()
+        end)
 
-		local layout = Instance.new("UIListLayout")
-		layout.Padding = UDim.new(0, 2)
-		layout.Parent = data.section
-	end
+        local scrollCP = Instance.new("ScrollingFrame")
+        scrollCP.Size = UDim2.new(1, -10, 1, -40)
+        scrollCP.Position = UDim2.new(0, 5, 0, 35)
+        scrollCP.BackgroundTransparency = 1
+        scrollCP.ScrollBarThickness = 6
+        scrollCP.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        scrollCP.Parent = box
 
-	data.section.Visible = not collapsed
+        local listCP = Instance.new("UIListLayout")
+        listCP.Padding = UDim.new(0, 4)
+        listCP.Parent = scrollCP
 
-	-- hapus isi lama (kalau ada)
-	for _, child in ipairs(data.section:GetChildren()) do
-		if child:IsA("TextButton") then
-			child:Destroy()
-		end
-	end
+        -- Auto button and config inputs
+        local cfgFrame = Instance.new("Frame")
+        cfgFrame.Size = UDim2.new(1, -10, 0, 56)
+        cfgFrame.Position = UDim2.new(0, 5, 0, 0)
+        cfgFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        cfgFrame.BorderSizePixel = 0
+        cfgFrame.Parent = scrollCP
 
-	-- isi ulang CP
-	if not collapsed then
-		for _, p in ipairs(data.points) do
-			local btn = Instance.new("TextButton")
-			btn.Size = UDim2.new(1, -10, 0, 20)
-			btn.BackgroundColor3 = Color3.fromRGB(65,65,65)
-			btn.Text = "➡️ " .. p.name
-			btn.TextColor3
-				btn.MouseButton1Click:Connect(function()
-					teleportTo(p.pos, gunungName .. " - " .. p.name)
-				end)
-				table.insert(buttons, btn)
-			end
-		end
-	end)
+        local delayBox = Instance.new("TextBox")
+        delayBox.Size = UDim2.new(0, 70, 0, 24)
+        delayBox.Position = UDim2.new(0, 8, 0, 8)
+        delayBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        delayBox.TextColor3 = Color3.new(1, 1, 1)
+        delayBox.Font = Enum.Font.GothamBold
+        delayBox.Text = "5"
+        delayBox.TextSize = 13
+        delayBox.ClearTextOnFocus = false
+        delayBox.Parent = cfgFrame
+
+        local delayLabel = Instance.new("TextLabel")
+        delayLabel.Size = UDim2.new(0, 110, 0, 24)
+        delayLabel.Position = UDim2.new(0, 86, 0, 8)
+        delayLabel.BackgroundTransparency = 1
+        delayLabel.Text = "Delay (1-60s)"
+        delayLabel.TextColor3 = Color3.new(1, 1, 1)
+        delayLabel.Font = Enum.Font.Gotham
+        delayLabel.TextSize = 13
+        delayLabel.Parent = cfgFrame
+
+        local startBox = Instance.new("TextBox")
+        startBox.Size = UDim2.new(0, 70, 0, 24)
+        startBox.Position = UDim2.new(0, 8, 0, 32)
+        startBox.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+        startBox.TextColor3 = Color3.new(1, 1, 1)
+        startBox.Font = Enum.Font.GothamBold
+        startBox.Text = "1"
+        startBox.TextSize = 13
+        startBox.ClearTextOnFocus = false
+        startBox.Parent = cfgFrame
+
+        local startLabel = Instance.new("TextLabel")
+        startLabel.Size = UDim2.new(0, 110, 0, 24)
+        startLabel.Position = UDim2.new(0, 86, 0, 32)
+        startLabel.BackgroundTransparency = 1
+        startLabel.Text = "Start CP (number)"
+        startLabel.TextColor3 = Color3.new(1, 1, 1)
+        startLabel.Font = Enum.Font.Gotham
+        startLabel.TextSize = 13
+        startLabel.Parent = cfgFrame
+
+        local autoBtn = Instance.new("TextButton")
+        autoBtn.Size = UDim2.new(1, -10, 0, 28)
+        autoBtn.Position = UDim2.new(0, 5, 0, 64)
+        autoBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        autoBtn.Text = "▶️ Auto Teleport"
+        autoBtn.TextColor3 = Color3.new(1,1,1)
+        autoBtn.Font = Enum.Font.GothamBold
+        autoBtn.TextSize = 13
+        autoBtn.Parent = scrollCP
+
+        local running = false
+        autoBtn.MouseButton1Click:Connect(function()
+            if running then
+                running = false
+                autoBtn.Text = "▶️ Auto Teleport"
+                return
+            end
+            running = true
+            autoBtn.Text = "⏸️ Stop"
+            spawn(function()
+                local delayTime = math.clamp(tonumber(delayBox.Text) or 5, 1, 60)
+                local startIndex = math.max(1, tonumber(startBox.Text) or 1)
+                while running do
+                    for i = startIndex, #data.points do
+                        if not running then break end
+                        local p = data.points[i]
+                        teleportTo(p.pos, gunungName .. " - " .. p.name)
+                        task.wait(delayTime)
+                    end
+                    running = false
+                    autoBtn.Text = "▶️ Auto Teleport"
+                end
+            end)
+        end)
+
+        for _, p in ipairs(data.points) do
+            local cpBtn = Instance.new("TextButton")
+            cpBtn.Size = UDim2.new(1, -10, 0, 22)
+            cpBtn.BackgroundColor3 = Color3.fromRGB(65,65,65)
+            cpBtn.Text = "➡️ " .. p.name
+            cpBtn.TextColor3 = Color3.new(1,1,1)
+            cpBtn.Font = Enum.Font.Gotham
+            cpBtn.TextSize = 12
+            cpBtn.Parent = scrollCP
+            cpBtn.MouseButton1Click:Connect(function()
+                teleportTo(p.pos, gunungName .. " - " .. p.name)
+            end)
+        end
+
+        -- adjust canvas size after building
+        task.delay(0.05, function()
+            pcall(function()
+                scrollCP.CanvasSize = UDim2.new(0, 0, 0, listCP.AbsoluteContentSize.Y + 10)
+            end)
+        end)
+    end)
 end
 
--- Auto-size canvas
+-- Auto-size main canvas
 task.delay(0.05, function()
-	pcall(function()
-		scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-	end)
+    pcall(function()
+        scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
 end)
 
 -- Helpful note
 local note = Instance.new("TextLabel")
 note.Size = UDim2.new(1, -10, 0, 18)
 note.BackgroundTransparency = 1
-note.Text = "Tip: Edit `teleportData` table to add more mountains."
+note.Text = "Tip: Click a mountain to open its CP list. Close all with 'Close All CP Boxes'."
 note.TextColor3 = Color3.fromRGB(180,180,180)
 note.Font = Enum.Font.Gotham
 note.TextSize = 11
