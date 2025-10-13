@@ -1,11 +1,9 @@
--- 🧭 Ady Hub - Teleport Box (Custom GUI, 1 Gunung Sumbing)
+-- 🧭 Ady Hub - Teleport Box (Custom GUI + Collapse + Auto Teleport + Start CP)
 
--- Hapus kalau sudah ada
 if game.CoreGui:FindFirstChild("TeleportBox") then
 	game.CoreGui.TeleportBox:Destroy()
 end
 
--- Buat GUI utama
 local gui = Instance.new("ScreenGui")
 gui.Name = "TeleportBox"
 gui.ResetOnSpawn = false
@@ -13,8 +11,8 @@ gui.Parent = game:GetService("CoreGui")
 
 -- Frame utama
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 360, 0, 420)
-main.Position = UDim2.new(0.5, -180, 0.5, -210)
+main.Size = UDim2.new(0, 380, 0, 480)
+main.Position = UDim2.new(0.5, -190, 0.5, -240)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Active = true
@@ -66,7 +64,7 @@ local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 6)
 layout.Parent = scroll
 
--- 🔹 Data Gunung Sumbing
+-- 🔹 Data Gunung
 local teleportData = {
 	["Gunung Sumbing"] = {
 		icon = "⛰️",
@@ -82,8 +80,7 @@ local teleportData = {
 }
 
 -- fungsi teleport
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local player = game:GetService("Players").LocalPlayer
 local function teleportTo(pos, label)
 	local char = player.Character
 	if char and char:FindFirstChild("HumanoidRootPart") then
@@ -91,46 +88,145 @@ local function teleportTo(pos, label)
 		game.StarterGui:SetCore("SendNotification", {
 			Title = "✅ Teleport",
 			Text = "Berhasil ke " .. label,
-			Duration = 3
+			Duration = 2
 		})
 	else
 		game.StarterGui:SetCore("SendNotification", {
 			Title = "⚠️ Gagal Teleport",
 			Text = "Karakter tidak ditemukan!",
-			Duration = 3
+			Duration = 2
 		})
 	end
 end
 
--- Buat tombol-tombol teleport
+-------------------------------------------------
+-- 🔸 Input pengaturan (Delay & Start CP)
+-------------------------------------------------
+local labelDelay = Instance.new("TextLabel")
+labelDelay.Size = UDim2.new(1, -20, 0, 25)
+labelDelay.Position = UDim2.new(0, 10, 0, 0)
+labelDelay.BackgroundTransparency = 1
+labelDelay.Text = "⏱️ Delay antar teleport (1–60 detik):"
+labelDelay.TextColor3 = Color3.new(1, 1, 1)
+labelDelay.Font = Enum.Font.Gotham
+labelDelay.TextSize = 14
+labelDelay.Parent = scroll
+
+local delayBox = Instance.new("TextBox")
+delayBox.Size = UDim2.new(0, 80, 0, 25)
+delayBox.Position = UDim2.new(0, 10, 0, 25)
+delayBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+delayBox.TextColor3 = Color3.new(1, 1, 1)
+delayBox.Font = Enum.Font.GothamBold
+delayBox.TextSize = 14
+delayBox.Text = "5"
+delayBox.ClearTextOnFocus = false
+delayBox.Parent = scroll
+
+local labelStart = Instance.new("TextLabel")
+labelStart.Size = UDim2.new(1, -20, 0, 25)
+labelStart.Position = UDim2.new(0, 10, 0, 55)
+labelStart.BackgroundTransparency = 1
+labelStart.Text = "🏁 Mulai dari checkpoint (nomor):"
+labelStart.TextColor3 = Color3.new(1, 1, 1)
+labelStart.Font = Enum.Font.Gotham
+labelStart.TextSize = 14
+labelStart.Parent = scroll
+
+local startBox = Instance.new("TextBox")
+startBox.Size = UDim2.new(0, 80, 0, 25)
+startBox.Position = UDim2.new(0, 10, 0, 80)
+startBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+startBox.TextColor3 = Color3.new(1, 1, 1)
+startBox.Font = Enum.Font.GothamBold
+startBox.TextSize = 14
+startBox.Text = "1"
+startBox.ClearTextOnFocus = false
+startBox.Parent = scroll
+
+local separator = Instance.new("Frame")
+separator.Size = UDim2.new(1, -10, 0, 2)
+separator.Position = UDim2.new(0, 5, 0, 115)
+separator.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+separator.BorderSizePixel = 0
+separator.Parent = scroll
+
+-------------------------------------------------
+-- 🔹 Gunung (Collapse + Auto Teleport)
+-------------------------------------------------
 for gunungName, data in pairs(teleportData) do
-	local titleFrame = Instance.new("Frame")
-	titleFrame.Size = UDim2.new(1, -10, 0, 30)
-	titleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-	titleFrame.BorderSizePixel = 0
-	titleFrame.Parent = scroll
+	local collapsed = true
+	local buttons = {}
 
-	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(1, 0, 1, 0)
-	title.BackgroundTransparency = 1
-	title.Text = data.icon .. " " .. gunungName
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 16
-	title.Parent = titleFrame
+	local headerFrame = Instance.new("TextButton")
+	headerFrame.Size = UDim2.new(1, -10, 0, 30)
+	headerFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	headerFrame.Text = data.icon .. " " .. gunungName .. " ▼"
+	headerFrame.TextColor3 = Color3.new(1, 1, 1)
+	headerFrame.Font = Enum.Font.GothamBold
+	headerFrame.TextSize = 16
+	headerFrame.Parent = scroll
 
-	for _, p in ipairs(data.points) do
-		local btn = Instance.new("TextButton")
-		btn.Size = UDim2.new(1, -10, 0, 28)
-		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-		btn.Text = "➡️ " .. p.name
-		btn.TextColor3 = Color3.new(1, 1, 1)
-		btn.Font = Enum.Font.Gotham
-		btn.TextSize = 14
-		btn.Parent = scroll
+	local autoBtn = Instance.new("TextButton")
+	autoBtn.Size = UDim2.new(0, 160, 0, 25)
+	autoBtn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+	autoBtn.TextColor3 = Color3.new(1, 1, 1)
+	autoBtn.Font = Enum.Font.GothamBold
+	autoBtn.TextSize = 14
+	autoBtn.Text = "▶️ Auto Teleport"
+	autoBtn.Visible = false
+	autoBtn.Parent = scroll
 
-		btn.MouseButton1Click:Connect(function()
-			teleportTo(p.pos, gunungName .. " - " .. p.name)
+	local running = false
+
+	autoBtn.MouseButton1Click:Connect(function()
+		if running then
+			running = false
+			autoBtn.Text = "▶️ Auto Teleport"
+			return
+		end
+		running = true
+		autoBtn.Text = "⏸️ Stop Auto"
+
+		local delayTime = tonumber(delayBox.Text) or 5
+		delayTime = math.clamp(delayTime, 1, 60)
+		local startIndex = tonumber(startBox.Text) or 1
+
+		spawn(function()
+			while running do
+				for i = startIndex, #data.points do
+					if not running then break end
+					local p = data.points[i]
+					teleportTo(p.pos, gunungName .. " - " .. p.name)
+					task.wait(delayTime)
+				end
+			end
 		end)
-	end
+	end)
+
+	headerFrame.MouseButton1Click:Connect(function()
+		collapsed = not collapsed
+		headerFrame.Text = data.icon .. " " .. gunungName .. (collapsed and " ▼" or " ▲")
+		autoBtn.Visible = not collapsed
+
+		if collapsed then
+			for _, b in ipairs(buttons) do b:Destroy() end
+			buttons = {}
+		else
+			for _, p in ipairs(data.points) do
+				local btn = Instance.new("TextButton")
+				btn.Size = UDim2.new(1, -10, 0, 25)
+				btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+				btn.Text = "➡️ " .. p.name
+				btn.TextColor3 = Color3.new(1, 1, 1)
+				btn.Font = Enum.Font.Gotham
+				btn.TextSize = 14
+				btn.Parent = scroll
+				btn.MouseButton1Click:Connect(function()
+					teleportTo(p.pos, gunungName .. " - " .. p.name)
+				end)
+				table.insert(buttons, btn)
+			end
+		end
+	end)
 end
