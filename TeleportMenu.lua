@@ -1,24 +1,20 @@
--- 🧭 Ady Hub - Teleport Menu (Integrasi ke GUI utama)
+-- 🧭 Ady Hub - Teleport Menu (Integrasi langsung ke tab Gunung)
 -- By Ady & ChatGPT
 
-return function(GUI)
-
+return function(gunungTab)
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
 
-    -------------------------------------------------
-    -- ⚙️ Fungsi Teleport
-    -------------------------------------------------
     local function teleportTo(pos, label)
         local char = player.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             char:MoveTo(pos)
-            GUI:CreateNotify({
+            gunungTab:CreateNotify({
                 title = "✅ Teleport",
                 description = "Berhasil ke " .. label
             })
         else
-            GUI:CreateNotify({
+            gunungTab:CreateNotify({
                 title = "⚠️ Gagal Teleport",
                 description = "Karakter tidak ditemukan!"
             })
@@ -28,7 +24,7 @@ return function(GUI)
     -------------------------------------------------
     -- 🏔️ GUNUNG SUMBING
     -------------------------------------------------
-    local sumbingSection = GUI:CreateSection({ text = "🏔️ Gunung Sumbing" })
+    local sumbingSection = gunungTab:CreateSection({ text = "🏔️ Gunung Sumbing" })
     local sumbing = {
         { name = "Awal",   pos = Vector3.new(-391.71, 5.01, 245.32) },
         { name = "cp1",    pos = Vector3.new(-376.50, 425.01, 2182.94) },
@@ -36,12 +32,12 @@ return function(GUI)
         { name = "cp3",    pos = Vector3.new(-47.78, 1263.81, 4013.42) },
         { name = "cp5",    pos = Vector3.new(-989.67, 1896.13, 5426.57) },
     }
-    for _, point in ipairs(sumbing) do
-        GUI:CreateButton({
+    for _, p in ipairs(sumbing) do
+        gunungTab:CreateButton({
             parent = sumbingSection,
-            text = "➡️ " .. point.name,
+            text = "➡️ " .. p.name,
             callback = function()
-                teleportTo(point.pos, "Gunung Sumbing - " .. point.name)
+                teleportTo(p.pos, "Gunung Sumbing - " .. p.name)
             end
         })
     end
@@ -49,7 +45,7 @@ return function(GUI)
     -------------------------------------------------
     -- 🌋 GUNUNG KAWAI
     -------------------------------------------------
-    local kawaiSection = GUI:CreateSection({ text = "🌋 Gunung Kawai" })
+    local kawaiSection = gunungTab:CreateSection({ text = "🌋 Gunung Kawai" })
     local kawai = {
         { name = "cp1", pos = Vector3.new(275.65, 84.73, 247.94) },
         { name = "cp3", pos = Vector3.new(1200.37, 273.29, 293.01) },
@@ -57,12 +53,12 @@ return function(GUI)
         { name = "cp8", pos = Vector3.new(3670.93, 494.24, 251.00) },
         { name = "finish", pos = Vector3.new(5139.54, 1147.29, 4713.37) },
     }
-    for _, point in ipairs(kawai) do
-        GUI:CreateButton({
+    for _, p in ipairs(kawai) do
+        gunungTab:CreateButton({
             parent = kawaiSection,
-            text = "➡️ " .. point.name,
+            text = "➡️ " .. p.name,
             callback = function()
-                teleportTo(point.pos, "Gunung Kawai - " .. point.name)
+                teleportTo(p.pos, "Gunung Kawai - " .. p.name)
             end
         })
     end
@@ -70,19 +66,19 @@ return function(GUI)
     -------------------------------------------------
     -- 🌄 GUNUNG RINDARA
     -------------------------------------------------
-    local rindaraSection = GUI:CreateSection({ text = "🌄 Gunung Rindara" })
+    local rindaraSection = gunungTab:CreateSection({ text = "🌄 Gunung Rindara" })
     local rindara = {
         { name = "cp1", pos = Vector3.new(-6.942, 68.008, -45.782) },
         { name = "cp5", pos = Vector3.new(-612.847, 219.089, -1331.625) },
         { name = "cp10", pos = Vector3.new(-629.122, 362.349, -4072.554) },
         { name = "finish", pos = Vector3.new(1744.773, 1104.645, -5026.188) },
     }
-    for _, point in ipairs(rindara) do
-        GUI:CreateButton({
+    for _, p in ipairs(rindara) do
+        gunungTab:CreateButton({
             parent = rindaraSection,
-            text = "➡️ " .. point.name,
+            text = "➡️ " .. p.name,
             callback = function()
-                teleportTo(point.pos, "Gunung Rindara - " .. point.name)
+                teleportTo(p.pos, "Gunung Rindara - " .. p.name)
             end
         })
     end
@@ -90,14 +86,14 @@ return function(GUI)
     -------------------------------------------------
     -- ℹ️ INFO
     -------------------------------------------------
-    local infoSection = GUI:CreateSection({ text = "ℹ️ Tentang Menu Teleport" })
-    GUI:CreateButton({
+    local infoSection = gunungTab:CreateSection({ text = "ℹ️ Tentang Menu Teleport" })
+    gunungTab:CreateButton({
         parent = infoSection,
         text = "Informasi",
         callback = function()
-            GUI:CreateNotify({
+            gunungTab:CreateNotify({
                 title = "Teleport Menu",
-                description = "Daftar gunung dimuat langsung di tab Gunung Ady Hub.\nGunung: Sumbing, Kawai, Rindara."
+                description = "Gunung Sumbing, Kawai, Rindara siap digunakan."
             })
         end
     })
