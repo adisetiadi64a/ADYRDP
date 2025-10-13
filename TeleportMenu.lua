@@ -1,7 +1,8 @@
--- 🧭 Ady Hub - Teleport Menu (Integrasi dengan GUI utama)
+-- 🧭 Ady Hub - Teleport Menu (Integrasi ke GUI utama)
 -- By Ady & ChatGPT
 
-return function(GUI)
+return function(GUI) -- ⬅️ di baris pertama
+
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
 
@@ -110,4 +111,4 @@ return function(GUI)
             })
         end
     })
-end
+end -- ⬅️ baris terakhir WAJIB ditutup dengan 'end'
