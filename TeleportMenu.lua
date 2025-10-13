@@ -75,6 +75,177 @@ local teleportData = {
 			{ name = "cp5", pos = Vector3.new(-989.67, 1896.13, 5426.57) },
 		}
 	},
+	
+    ["Gunung Prambanan"] = {
+		icon = "⛰️",
+		points = {
+			{ name = "cp1", pos = Vector3.new(-313.019, 37.941, 878.038) },
+			{ name = "cp2", pos = Vector3.new(-78.025, 46.134, 935.538) },
+			{ name = "cp3", pos = Vector3.new(-79.244, 121.737, 1013.295) },
+			{ name = "cp4", pos = Vector3.new(-111.648, 121.976, 789.963) },
+			{ name = "cp5", pos = Vector3.new(53.335, 221.885, 809.889) },
+			{ name = "cp6", pos = Vector3.new(72.573, 218.971, 896.509) },
+			{ name = "cp7", pos = Vector3.new(65.019, 202.593, 1390.312) },
+			{ name = "cp8", pos = Vector3.new(377.617, 110.672, 1883.454) },
+			{ name = "cp9", pos = Vector3.new(597.975, 154.437, 1210.952) },
+			{ name = "cp10", pos = Vector3.new(840.955, 194.321, 862.219) },
+			{ name = "cp11", pos = Vector3.new(568.781, 222.976, 576.038) },
+			{ name = "cp12", pos = Vector3.new(139.471, 410.136, 309.629) },
+			{ name = "cp13", pos = Vector3.new(113.769, 407.232, 165.234) },
+			{ name = "cp14", pos = Vector3.new(410.260, 408.099, -11.131) },
+			{ name = "cp15", pos = Vector3.new(631.684, 406.593, -50.940) },
+			{ name = "cp16", pos = Vector3.new(1317.062, 402.275, -18.839) },
+			{ name = "cp17", pos = Vector3.new(1846.751, 270.437, -256.768) },
+			{ name = "cp18", pos = Vector3.new(1943.206, 270.437, -475.053) },
+			{ name = "cp19", pos = Vector3.new(1773.749, 354.437, -497.223) },
+			{ name = "cp20", pos = Vector3.new(1341.667, 354.437, -519.987) },
+			{ name = "cp21", pos = Vector3.new(1134.124, 361.636, -507.621) },
+			{ name = "cp22", pos = Vector3.new(884.959, 422.593, -501.815) },
+			{ name = "cp23", pos = Vector3.new(220.728, 410.129, -659.692) },
+			{ name = "cp24", pos = Vector3.new(108.022, 510.437, -550.268) },
+			{ name = "cp25", pos = Vector3.new(-287.965, 554.337, -349.616) },
+			{ name = "cp26", pos = Vector3.new(-890.938, 513.008, -615.087) },
+		}
+	},
+
+	["Gunung YNTKTS"] = {
+		icon = "🏔️",
+		points = {
+			{ name = "cp1", pos = Vector3.new(-45.633, 42.523, -555.684) },
+			{ name = "cp2", pos = Vector3.new(831.428, 66.533, -430.544) },
+			{ name = "cp3", pos = Vector3.new(1016.156, 71.146, -109.264) },
+			{ name = "cp4", pos = Vector3.new(2087.681, 70.532, -149.818) },
+			{ name = "cp5", pos = Vector3.new(2329.175, 62.750, -135.099) },
+			{ name = "cp6", pos = Vector3.new(2548.745, 42.401, -412.719) },
+			{ name = "cp7", pos = Vector3.new(2679.067, 86.612, -335.003) },
+			{ name = "cp8", pos = Vector3.new(2710.476, 158.735, -363.584) },
+			{ name = "cp9", pos = Vector3.new(3032.635, 154.528, -367.989) },
+			{ name = "cp10", pos = Vector3.new(3238.665, 118.545, -411.910) },
+			{ name = "cp11", pos = Vector3.new(3667.236, 22.669, -219.243) },
+			{ name = "cp12", pos = Vector3.new(3725.937, 90.527, -246.372) },
+			{ name = "cp13", pos = Vector3.new(3965.504, 66.756, -309.780) },
+			{ name = "cp14", pos = Vector3.new(4438.375, 83.462, -308.013) },
+		}
+	},
+	
+	["Gunung Aneh"] = {
+		icon = "🗻",
+		points = {
+			{ name = "cp2", pos = Vector3.new(-23.69, 597.01, 507.89) },
+			{ name = "cp3", pos = Vector3.new(468.91, 601.01, 443.64) },
+			{ name = "cp4", pos = Vector3.new(1172.81, 646.01, 668.12) },
+			{ name = "cp5", pos = Vector3.new(2124.97, 786.40, 1024.68) },
+			{ name = "cp6", pos = Vector3.new(2726.26, 916.01, 1196.33) },
+			{ name = "cp7", pos = Vector3.new(3451.35, 1309.01, 1768.11) },
+			{ name = "cp8", pos = Vector3.new(3205.85, 1613.01, 2725.28) },
+		}
+	},
+	["Gunung Kawai"] = {
+		icon = "🌋",
+		points = {
+			{ name = "cp1", pos = Vector3.new(275.65, 84.73, 247.94) },
+			{ name = "cp2", pos = Vector3.new(583.77, 275.87, -56.04) },
+			{ name = "cp3", pos = Vector3.new(1200.37, 273.29, 293.01) },
+			{ name = "cp4", pos = Vector3.new(1551.19, 286.17, 288.59) },
+			{ name = "cp5", pos = Vector3.new(1819.28, 325.01, -7.08) },
+			{ name = "cp6", pos = Vector3.new(2256.92, 397.61, 109.88) },
+			{ name = "cp7", pos = Vector3.new(3165.28, 513.01, 334.94) },
+			{ name = "cp8", pos = Vector3.new(3670.93, 494.24, 251.00) },
+			{ name = "cp9", pos = Vector3.new(4221.57, 492.12, 514.72) },
+			{ name = "cp10", pos = Vector3.new(4414.23, 709.01, 809.32) },
+			{ name = "cp11", pos = Vector3.new(4370.59, 701.41, 1875.67) },
+			{ name = "cp12", pos = Vector3.new(5029.31, 445.93, 2445.03) },
+			{ name = "cp13", pos = Vector3.new(5226.98, 447.45, 3078.37) },
+			{ name = "cp14", pos = Vector3.new(5252.75, 446.75, 3866.20) },
+			{ name = "cp15", pos = Vector3.new(5312.39, 692.43, 4056.49) },
+			{ name = "cp16", pos = Vector3.new(5430.21, 1095.96, 4401.30) },
+			{ name = "finish", pos = Vector3.new(5139.54, 1147.29, 4713.37) },
+		}
+	},
+["Gunung Yahayuk"] = {
+ icon = "⛰️",
+ points = {
+ { name = "cp1", pos =
+ Vector3.new(-420.13, 248.01, 786.83) }, 
+{ name = "cp2", pos =
+ Vector3.new(-332.34, 387.01, 525.27) }, 
+{ name = "cp3", pos =
+ Vector3.new(295.65, 428.73, 494.68) }, 
+{ name = "cp4", pos =
+ Vector3.new(327.19, 489.01, 345.06) }, 
+{ name = "cp5", pos = 
+Vector3.new(231.39, 313.01, -145.40) }, 
+{ name = "cp6", pos = 
+Vector3.new(-478.91, 710.34, -409.71) },
+ }
+ },
+
+	["Gunung Pengganguran"] = {
+		icon = "🏔️",
+		points = {
+			{ name = "cp1", pos = Vector3.new(-60.969, 53.007, -1173.702) },
+			{ name = "cp2", pos = Vector3.new(-378.102, 145.008, -1781.101) },
+			{ name = "cp3", pos = Vector3.new(-587.527, 276.789, -1570.368) },
+			{ name = "cp4", pos = Vector3.new(-951.935, 253.008, -1579.784) },
+			{ name = "cp5", pos = Vector3.new(-1277.299, 256.756, -1798.436) },
+			{ name = "cp6", pos = Vector3.new(-1645.830, 168.987, -1671.342) },
+			{ name = "cp7", pos = Vector3.new(-2141.449, 377.008, -1334.677) },
+			{ name = "cp8", pos = Vector3.new(-1991.575, 477.008, -184.452) },
+			{ name = "cp9", pos = Vector3.new(-2385.999, 585.007, -111.349) },
+			{ name = "cp10", pos = Vector3.new(-2023.047, 724.566, 64.546) },
+			{ name = "cp11", pos = Vector3.new(-1621.521, 747.467, -8.590) },
+			{ name = "cp12", pos = Vector3.new(-1843.068, 784.807, 639.782) },
+			{ name = "cp13", pos = Vector3.new(-2260.079, 1021.007, 1434.147) },
+			{ name = "cp14", pos = Vector3.new(-2377.022, 1061.007, 1834.373) },
+			{ name = "cp15", pos = Vector3.new(-2713.954, 1205.007, 1921.084) },
+			{ name = "cp16", pos = Vector3.new(-3081.088, 1337.007, 1858.613) },
+			{ name = "cp17", pos = Vector3.new(-3235.904, 1337.007, 2173.848) },
+			{ name = "finish", pos = Vector3.new(-3337.460, 1424.834, 2207.007) },
+		}
+	},
+	
+	["Gunung Rindara"] = {
+		icon = "🌄",
+		points = {
+			{ name = "cp1", pos = Vector3.new(-6.942, 68.008, -45.782) },
+			{ name = "cp2", pos = Vector3.new(-31.496, 33.614, -462.236) },
+			{ name = "cp3", pos = Vector3.new(344.766, 81.008, -769.411) },
+			{ name = "cp4", pos = Vector3.new(-107.222, 141.008, -1380.291) },
+			{ name = "cp5", pos = Vector3.new(-612.847, 219.089, -1331.625) },
+			{ name = "cp6", pos = Vector3.new(-1143.874, 186.507, -1584.812) },
+			{ name = "cp7", pos = Vector3.new(-1028.492, 185.008, -1812.884) },
+			{ name = "cp8", pos = Vector3.new(-121.310, 356.770, -3007.281) },
+			{ name = "cp9", pos = Vector3.new(-807.717, 321.008, -3179.727) },
+			{ name = "cp10", pos = Vector3.new(-629.122, 362.349, -4072.554) },
+			{ name = "cp11", pos = Vector3.new(-84.064, 492.885, -4365.187) },
+			{ name = "cp12", pos = Vector3.new(-170.922, 476.542, -4773.956) },
+			{ name = "cp13", pos = Vector3.new(-171.837, 553.007, -4904.244) },
+			{ name = "cp14", pos = Vector3.new(-204.188, 593.007, -5047.344) },
+			{ name = "cp15", pos = Vector3.new(-272.518, 645.007, -4948.372) },
+			{ name = "cp16", pos = Vector3.new(-93.343, 701.007, -5050.534) },
+			{ name = "cp17", pos = Vector3.new(343.711, 609.897, -4955.690) },
+			{ name = "cp18", pos = Vector3.new(644.947, 651.565, -4508.574) },
+			{ name = "cp19", pos = Vector3.new(900.133, 677.007, -4327.476) },
+			{ name = "cp20", pos = Vector3.new(1288.082, 776.831, -4648.964) },
+			{ name = "cp21", pos = Vector3.new(1657.953, 821.327, -4200.537) },
+			{ name = "cp22", pos = Vector3.new(1667.865, 933.901, -5006.915) },
+			{ name = "finish", pos = Vector3.new(1744.773, 1104.645, -5026.188) },
+		}
+	},
+        ["Gunung Taroja"] = {
+		icon = "🗻",
+		points = {
+			{ name = "cp1", pos = Vector3.new(4.786, 112.448, 98.836) },
+			{ name = "cp2", pos = Vector3.new(-71.968, 160.141, -314.002) },
+			{ name = "cp3", pos = Vector3.new(518.516, 317.808, -362.968) },
+			{ name = "cp4", pos = Vector3.new(869.861, 413.958, -1016.750) },
+			{ name = "cp5", pos = Vector3.new(653.632, 649.007, -1282.004) },
+			{ name = "cp6", pos = Vector3.new(696.596, 950.007, -1671.589) },
+			{ name = "cp7", pos = Vector3.new(799.355, 1145.007, -1844.764) },
+			{ name = "cp8", pos = Vector3.new(1248.602, 1350.007, -1786.630) },
+			{ name = "Finish", pos = Vector3.new(1338.813, 1753.815, -2986.280) },
+		}
+	},
 }
 
 -- 🧠 Fungsi teleport
