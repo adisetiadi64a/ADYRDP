@@ -365,24 +365,40 @@ for gunungName, data in pairs(teleportData) do
 	end)
 
 	headerBtn.MouseButton1Click:Connect(function()
-		collapsed = not collapsed
-		headerBtn.Text = (data.icon or "") .. " " .. gunungName .. (collapsed and " ▼" or " ▲")
-		autoBtn.Visible = not collapsed
+	collapsed = not collapsed
+	headerBtn.Text = (data.icon or "") .. " " .. gunungName .. (collapsed and " ▼" or " ▲")
+	autoBtn.Visible = not collapsed
 
-		-- clear previous
-		for _, b in ipairs(buttons) do b:Destroy() end
-		buttons = {}
+	-- buat container khusus buat tombol CP gunung ini
+	if not data.section then
+		data.section = Instance.new("Frame")
+		data.section.Size = UDim2.new(1, -10, 0, 0)
+		data.section.BackgroundTransparency = 1
+		data.section.AutomaticSize = Enum.AutomaticSize.Y
+		data.section.Parent = scroll
 
-		if not collapsed then
-			for _, p in ipairs(data.points) do
-				local btn = Instance.new("TextButton")
-				btn.Size = UDim2.new(1, -10, 0, 20)
-				btn.BackgroundColor3 = Color3.fromRGB(65,65,65)
-				btn.Text = "➡️ " .. p.name
-				btn.TextColor3 = Color3.new(1,1,1)
-				btn.Font = Enum.Font.Gotham
-				btn.TextSize = 12
-				btn.Parent = scroll
+		local layout = Instance.new("UIListLayout")
+		layout.Padding = UDim.new(0, 2)
+		layout.Parent = data.section
+	end
+
+	data.section.Visible = not collapsed
+
+	-- hapus isi lama (kalau ada)
+	for _, child in ipairs(data.section:GetChildren()) do
+		if child:IsA("TextButton") then
+			child:Destroy()
+		end
+	end
+
+	-- isi ulang CP
+	if not collapsed then
+		for _, p in ipairs(data.points) do
+			local btn = Instance.new("TextButton")
+			btn.Size = UDim2.new(1, -10, 0, 20)
+			btn.BackgroundColor3 = Color3.fromRGB(65,65,65)
+			btn.Text = "➡️ " .. p.name
+			btn.TextColor3
 				btn.MouseButton1Click:Connect(function()
 					teleportTo(p.pos, gunungName .. " - " .. p.name)
 				end)
