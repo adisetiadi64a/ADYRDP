@@ -314,7 +314,7 @@ startLabel.Parent = cfgFrame
 
 -- Build UI: for each gunung, collapsible list
 for gunungName, data in pairs(teleportData) do
-	local collapsed = true
+	local collapsed = false
 	local buttons = {}
 
 	local headerBtn = Instance.new("TextButton")
