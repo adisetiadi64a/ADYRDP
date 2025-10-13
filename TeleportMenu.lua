@@ -35,8 +35,9 @@ end
 -------------------------------------------------
 -- 🏔️ TAB: Gunung Sumbing
 -------------------------------------------------
-local sumbingTab = GUI:CreateTab("Sumbing", "mountain")
-GUI:CreateSection({ parent = sumbingTab, text = "Gunung Sumbing" })
+
+local gunungTab = GUI:CreateTab("Gunung", "mountain")
+GUI:CreateSection({ parent = gunungTab, text = "Gunung Sumbing" })
 
 local sumbing = {
     { name = "Awal",   pos = Vector3.new(-391.71, 5.01, 245.32) },
@@ -118,3 +119,4 @@ GUI:CreateButton({
         })
     end
 })
+
