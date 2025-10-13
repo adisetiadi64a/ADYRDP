@@ -66,6 +66,18 @@ layout.Parent = scroll
 
 -- CONFIG: teleportData (imported)
 local teleportData = {
+	["Gunung Sumbing"] = {
+		icon = "⛰️",
+		points = {
+			{ name = "Awal", pos = Vector3.new(-391.71, 5.01, 245.32) },
+			{ name = "cp1", pos = Vector3.new(-376.50, 425.01, 2182.94) },
+			{ name = "cp2", pos = Vector3.new(-368.54, 830.67, 3123.00) },
+			{ name = "cp3", pos = Vector3.new(-47.78, 1263.81, 4013.42) },
+			{ name = "cp4", pos = Vector3.new(-1014.69, 1553.01, 4823.71) },
+			{ name = "cp5", pos = Vector3.new(-989.67, 1896.13, 5426.57) },
+		}
+	},
+	
 ["Gunung Prambanan"] = {
 		icon = "⛰️",
 		points = {
