@@ -322,10 +322,19 @@ GUI:CreateButton({
             title = "Fish It",
             description = "Loading Fish It script..."
         })
+local games = {
+    [121864768012064] = "https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/FishIt.lua",
+}
 
-        -- panggil script aslinya dari myproject
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/FishIt.lua"))()
-    end
+local currentID = game.PlaceId
+local scriptURL = games[currentID]
+
+if scriptURL then
+    loadstring(game:HttpGet(scriptURL))()
+else
+    GUI:CreateNotify({title = "Info", description = "Lu ga di room fish it!"})
+			end
+            end
 })
 
 -------------------------------------------------
@@ -836,3 +845,4 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
