@@ -229,6 +229,36 @@ GUI:CreateButton({
 })
 
 -------------------------------------------------
+-- 🚷 Noclip Toggle (diambil dari GitHub)
+-------------------------------------------------
+local noclipEnabled = false
+
+GUI:CreateButton({
+	parent = playerTab,
+	text = "🚷 Toggle Noclip",
+	callback = function()
+		noclipEnabled = not noclipEnabled
+		if noclipEnabled then
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Mengaktifkan Noclip dari GitHub... ✅"
+			})
+			-- Jalankan script noclip dari GitHub kamu
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
+		else
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Noclip Nonaktif ❌"
+			})
+			-- Nonaktifkan manual jika script kamu ada fungsi disable
+			if _G.DisableNoclip then
+				pcall(_G.DisableNoclip)
+			end
+		end
+	end
+})
+
+-------------------------------------------------
 -- 🧭 Teleport Tab
 -------------------------------------------------
 local teleportTab = GUI:CreateTab("Teleport", "cigarette")
@@ -861,6 +891,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
