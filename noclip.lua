@@ -1,18 +1,17 @@
 --// noclip.lua
--- Versi GUI-friendly (untuk AdyHub)
--- Tidak pakai keybind, hanya dikontrol lewat tombol GUI
+-- Toggle pakai GUI, tanpa keybind
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-
 local noclipEnabled = true
 local stored = {}
 local conn
 
-local function enableNoclip()
+-- aktifkan noclip
+local function enable()
 	for _, v in pairs(character:GetDescendants()) do
 		if v:IsA("BasePart") then
 			if stored[v] == nil then
@@ -23,17 +22,18 @@ local function enableNoclip()
 	end
 end
 
-local function disableNoclip()
+-- matikan noclip
+local function disable()
 	if conn then conn:Disconnect() end
-	for v, val in pairs(stored) do
-		if v and v.Parent then
-			v.CanCollide = val
+	for part, val in pairs(stored) do
+		if part and part.Parent then
+			part.CanCollide = val
 		end
 	end
 	stored = {}
 end
 
--- Loop
+-- loop noclip
 conn = RunService.Stepped:Connect(function()
 	if not noclipEnabled then return end
 	if character then
@@ -45,25 +45,22 @@ conn = RunService.Stepped:Connect(function()
 	end
 end)
 
--- Respawn handling
 player.CharacterAdded:Connect(function(newChar)
 	character = newChar
-	task.wait(0.5)
+	task.wait(0.3)
 	if noclipEnabled then
-		enableNoclip()
+		enable()
 	end
 end)
 
--- Untuk matikan dari GUI
 _G.DisableNoclip = function()
 	noclipEnabled = false
-	disableNoclip()
+	disable()
 end
 
--- Untuk hidupkan lagi (kalau mau manual)
 _G.EnableNoclip = function()
 	noclipEnabled = true
-	enableNoclip()
+	enable()
 end
 
-enableNoclip()
+enable()
