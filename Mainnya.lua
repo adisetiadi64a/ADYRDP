@@ -227,11 +227,12 @@ GUI:CreateButton({
 	end
 })
 
-
 -------------------------------------------------
--- 🚷 Noclip Toggle (load dari GitHub)
+-- 🚷 Noclip Toggle (langsung di tab Player)
 -------------------------------------------------
 local noclipActive = false
+local player = game:GetService("Players").LocalPlayer
+local RunService = game:GetService("RunService")
 
 local noclipButton = GUI:CreateButton({
 	parent = playerTab,
@@ -242,22 +243,41 @@ local noclipButton = GUI:CreateButton({
 			noclipButton.Text = "🚷 Noclip: ON"
 			GUI:CreateNotify({
 				title = "Noclip",
-				description = "Noclip Diaktifkan ✅"
+				description = "Noclip Aktif ✅"
 			})
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
 		else
 			noclipButton.Text = "🚷 Noclip: OFF"
 			GUI:CreateNotify({
 				title = "Noclip",
 				description = "Noclip Dimatikan ❌"
 			})
-			if _G.DisableNoclip then
-				pcall(_G.DisableNoclip)
-			end
 		end
 	end
 })
 
+-- loop ringan untuk jaga CanCollide false saat aktif
+RunService.Stepped:Connect(function()
+	if not noclipActive then return end
+	local char = player.Character
+	if char then
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+-- kembalikan collide normal saat respawn
+player.CharacterAdded:Connect(function(char)
+	if not noclipActive then return end
+	task.wait(0.3)
+	for _, part in pairs(char:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+end)
 -------------------------------------------------
 -- 🧭 Teleport Tab
 -------------------------------------------------
@@ -891,6 +911,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
