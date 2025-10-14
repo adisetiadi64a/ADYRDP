@@ -229,13 +229,32 @@ GUI:CreateButton({
 
 
 -------------------------------------------------
--- 🚷 Noclip Button (load dari GitHub)
+-- 🚷 Noclip Toggle (load dari GitHub)
 -------------------------------------------------
-GUI:CreateButton({
+local noclipActive = false
+
+local noclipButton = GUI:CreateButton({
 	parent = playerTab,
-	text = "🚷 Noclip",
+	text = "🚷 Noclip: OFF",
 	callback = function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
+		noclipActive = not noclipActive
+		if noclipActive then
+			noclipButton.Text = "🚷 Noclip: ON"
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Noclip Diaktifkan ✅"
+			})
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
+		else
+			noclipButton.Text = "🚷 Noclip: OFF"
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Noclip Dimatikan ❌"
+			})
+			if _G.DisableNoclip then
+				pcall(_G.DisableNoclip)
+			end
+		end
 	end
 })
 
@@ -872,6 +891,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
