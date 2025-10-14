@@ -357,6 +357,22 @@ local miscTab = GUI:CreateTab("Misc", "wrench")
 GUI:CreateSection({ parent = miscTab, text = "Miscellaneous Tools" })
 
 -------------------------------------------------
+-- 🧊 Anti Lag (Client Performance)
+-------------------------------------------------
+GUI:CreateButton({
+	parent = miscTab,
+	text = "🧊 Anti Lag (Client)",
+	callback = function()
+		GUI:CreateNotify({
+			title = "Anti Lag",
+			description = "Mengaktifkan mode performa...",
+		})
+		-- Panggil script Anti Lag lewat RAW URL
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/NAMAUSER/REPO/refs/heads/main/AntiLag.lua"))()
+	end
+})
+
+-------------------------------------------------
 -- 🌿 FPS Booster
 -------------------------------------------------
 local Lighting = game:GetService("Lighting")
@@ -845,4 +861,5 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
