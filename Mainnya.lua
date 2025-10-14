@@ -228,29 +228,83 @@ GUI:CreateButton({
 	end
 })
 
--------------------------------------------------
--- 🚷 Noclip Toggle (diambil dari GitHub)
--------------------------------------------------
-local noclipEnabled = false
+🔥 Mantap, jadi kamu mau sistemnya sama seperti Fly Mode — bukan toggle pakai tombol N, tapi ada tombol di tab Player (misalnya “Noclip: ON / OFF”) yang bisa diklik buat menghidupkan & mematikan noclip langsung dari GUI.
 
-GUI:CreateButton({
+Berarti:
+
+Tombol “🚷 Noclip” akan tampil di tab Player.
+
+Saat diklik → aktifkan noclip.lua dari GitHub kamu.
+
+Saat diklik lagi → matikan noclip (tanpa perlu keybind).
+
+Ada notifikasi “Aktif / Nonaktif” seperti Fly.
+
+
+Berikut versi siap tempel ke Mainnya.lua, langsung di bagian tab Player (di bawah tombol Fly): 👇
+
+
+---
+
+🧩 Tambahan ke Mainnya.lua:
+
+-------------------------------------------------
+-- 🚷 Noclip GUI Toggle (ambil dari GitHub)
+-------------------------------------------------
+local noclipActive = false
+
+local noclipButton = GUI:CreateButton({
 	parent = playerTab,
-	text = "🚷 Toggle Noclip",
+	text = "🚷 Noclip: OFF",
 	callback = function()
-		noclipEnabled = not noclipEnabled
-		if noclipEnabled then
+		noclipActive = not noclipActive
+		if noclipActive then
+			noclipButton.Text = "🚷 Noclip: ON"
 			GUI:CreateNotify({
 				title = "Noclip",
-				description = "Mengaktifkan Noclip dari GitHub... ✅"
+				description = "Noclip Aktif ✅"
 			})
 			-- Jalankan script noclip dari GitHub kamu
 			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
 		else
+			noclipButton.Text = "🚷 Noclip: OFF"
 			GUI:CreateNotify({
 				title = "Noclip",
-				description = "Noclip Nonaktif ❌"
+				description = "Noclip Dimatikan ❌"
 			})
-			-- Nonaktifkan manual jika script kamu ada fungsi disable
+			-- Nonaktifkan jika script GitHub support _G.DisableNoclip
+			if _G.DisableNoclip then
+				pcall(_G.DisableNoclip)
+			end
+		end
+	end
+})
+
+-------------------------------------------------
+-- 🚷 Noclip GUI Toggle (ambil dari GitHub)
+-------------------------------------------------
+local noclipActive = false
+
+local noclipButton = GUI:CreateButton({
+	parent = playerTab,
+	text = "🚷 Noclip: OFF",
+	callback = function()
+		noclipActive = not noclipActive
+		if noclipActive then
+			noclipButton.Text = "🚷 Noclip: ON"
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Noclip Aktif ✅"
+			})
+			-- Jalankan script noclip dari GitHub kamu
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
+		else
+			noclipButton.Text = "🚷 Noclip: OFF"
+			GUI:CreateNotify({
+				title = "Noclip",
+				description = "Noclip Dimatikan ❌"
+			})
+			-- Nonaktifkan jika script GitHub support _G.DisableNoclip
 			if _G.DisableNoclip then
 				pcall(_G.DisableNoclip)
 			end
@@ -891,6 +945,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
