@@ -76,7 +76,16 @@ GUI:CreateButton({
 		end
 	end
 })
-
+-------------------------------------------------
+-- 🚷 Noclip Button (load dari GitHub)
+-------------------------------------------------
+GUI:CreateButton({
+	parent = playerTab,
+	text = "🚷 Noclip",
+	callback = function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/noclip.lua"))()
+	end
+})
 
 -------------------------------------------------
 -- ✈️ Fly Mode dengan GUI Naik/Turun
@@ -861,6 +870,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
