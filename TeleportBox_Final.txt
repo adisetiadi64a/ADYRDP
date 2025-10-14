@@ -247,7 +247,28 @@ Vector3.new(-478.91, 710.34, -409.71) },
 			{ name = "cp4", pos = Vector3.new(-1014.69, 1553.01, 4823.71) },
 			{ name = "cp5", pos = Vector3.new(-989.67, 1896.13, 5426.57) },
 		}
-	}
+	},
+["Gunung Tuing"] = {
+    icon = "🌋",
+    points = {
+        { name = "cp1", pos = Vector3.new(-227.287, 124.917, 369.677) },
+        { name = "cp2", pos = Vector3.new(-557.918, 236.854, 153.391) },
+        { name = "cp3", pos = Vector3.new(-912.470, 356.994, 372.038) },
+        { name = "cp4", pos = Vector3.new(-1066.061, 464.973, 247.373) },
+        { name = "cp5", pos = Vector3.new(-1418.609, 872.982, 56.944) },
+        { name = "cp6", pos = Vector3.new(-1608.601, 897.007, 287.539) },
+        { name = "cp7", pos = Vector3.new(-1833.470, 1052.497, -19.882) },
+        { name = "cp8", pos = Vector3.new(-1987.870, 1049.009, -107.416) },
+        { name = "cp9", pos = Vector3.new(-2091.562, 1121.918, -140.678) },
+        { name = "cp10", pos = Vector3.new(-2186.430, 1177.007, -127.287) },
+        { name = "cp11", pos = Vector3.new(-1906.480, 1161.007, -375.036) },
+        { name = "cp12", pos = Vector3.new(-2070.830, 1216.073, -632.575) },
+        { name = "cp13", pos = Vector3.new(-2253.667, 1221.008, -360.563) },
+        { name = "cp14", pos = Vector3.new(-2477.111, 1309.007, -419.227) },
+        { name = "cp15", pos = Vector3.new(-2915.488, 1293.007, -1057.173) },
+        { name = "cp16", pos = Vector3.new(-2629.655, 1669.007, -1491.756) },
+    }
+}
 }
 
 -- teleport function
