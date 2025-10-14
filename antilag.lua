@@ -1,22 +1,28 @@
--- LocalScript: ClientPerformanceMode.lua
--- Tempatkan di: StarterPlayer > StarterPlayerScripts
--- Fungsi:
---  - Menonaktifkan efek berat (particle, trail, shadow)
---  - Menurunkan kualitas rendering
---  - Menyembunyikan semua player lain untuk menghemat FPS (Hide All Players)
+-- 🧊 AntiLag.lua
+-- Client-side performance optimizer (untuk game buatanmu sendiri)
+-- Fitur:
+--  ✅ Hide all players (kecuali diri sendiri)
+--  ✅ Matikan efek berat (particle, trail, texture)
+--  ✅ Hapus skybox, bloom, sunrays, atmosphere
+--  ✅ Turunkan rendering quality
+--  ✅ Pencahayaan ringan tapi tetap jelas
 
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
-
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
--- Fungsi: sembunyikan semua pemain lain (kecuali diri sendiri)
+-------------------------------------------------
+-- ⚙️ Fungsi: Hide semua pemain lain
+-------------------------------------------------
 local function hideOtherPlayers()
 	for _, plr in pairs(Players:GetPlayers()) do
 		if plr ~= player and plr.Character then
 			for _, obj in pairs(plr.Character:GetDescendants()) do
-				if obj:IsA("BasePart") or obj:IsA("Decal") then
+				if obj:IsA("BasePart") then
+					obj.Transparency = 1
+					obj.CanCollide = false
+				elseif obj:IsA("Decal") or obj:IsA("Texture") then
 					obj.Transparency = 1
 				elseif obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
 					obj.Enabled = false
@@ -26,50 +32,73 @@ local function hideOtherPlayers()
 	end
 end
 
--- Mode performa sederhana
-local function enablePerformanceMode()
-	pcall(function()
-		Lighting.GlobalShadows = false
-		if Lighting:FindFirstChild("Atmosphere") then
-			Lighting.Atmosphere.Density = 0
-		end
-		Lighting.FogEnd = 1e6
-	end)
-
+-------------------------------------------------
+-- 💨 Fungsi: Matikan efek berat di Workspace
+-------------------------------------------------
+local function disableHeavyEffects()
 	for _, obj in pairs(workspace:GetDescendants()) do
-		if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+		if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") then
 			obj.Enabled = false
+		elseif obj:IsA("Beam") then
+			obj.Enabled = false
+		elseif obj:IsA("Decal") or obj:IsA("Texture") then
+			obj.Transparency = 1
+		end
+	end
+end
+
+-------------------------------------------------
+-- 🌌 Fungsi: Hapus langit-langit & efek lighting
+-------------------------------------------------
+local function removeSkyAndEffects()
+	for _, obj in pairs(Lighting:GetChildren()) do
+		if obj:IsA("Sky") or obj:IsA("BloomEffect") or obj:IsA("SunRaysEffect")
+			or obj:IsA("ColorCorrectionEffect") or obj:IsA("Atmosphere") then
+			obj:Destroy()
 		end
 	end
 
+	-- Set pencahayaan ringan tapi tetap terang
+	Lighting.GlobalShadows = false
+	Lighting.Brightness = 1
+	Lighting.FogEnd = 9e9
+	Lighting.FogStart = 0
+	Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+	Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+end
+
+-------------------------------------------------
+-- ⚙️ Fungsi: Turunkan kualitas rendering client
+-------------------------------------------------
+local function setLowGraphics()
 	pcall(function()
 		settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
 	end)
-
-	for _, gui in pairs(player:WaitForChild("PlayerGui"):GetDescendants()) do
-		if gui:IsA("ParticleEmitter") then
-			gui.Enabled = false
-		end
-	end
-
-	hideOtherPlayers()
 end
 
--- Update otomatis kalau ada pemain baru join
+-------------------------------------------------
+-- 🚀 Jalankan mode performa
+-------------------------------------------------
+local function enablePerformanceMode()
+	print("[🧊 AntiLag] Mengaktifkan mode performa...")
+	hideOtherPlayers()
+	disableHeavyEffects()
+	removeSkyAndEffects()
+	setLowGraphics()
+	print("[🧊 AntiLag] Semua optimasi aktif!")
+end
+
+-------------------------------------------------
+-- 🔁 Auto-hide player baru
+-------------------------------------------------
 Players.PlayerAdded:Connect(function(plr)
 	plr.CharacterAdded:Connect(function()
-		wait(0.5)
+		task.wait(0.5)
 		hideOtherPlayers()
 	end)
 end)
 
--- Jalankan
-if player then
-	player.CharacterAdded:Connect(function()
-		wait(0.5)
-		enablePerformanceMode()
-	end)
-	enablePerformanceMode()
-end
-
-print("✅ ClientPerformanceMode aktif: Partikel dimatikan dan semua player disembunyikan.")
+-------------------------------------------------
+-- ▶️ Jalankan otomatis saat dimuat
+-------------------------------------------------
+enablePerformanceMode()
