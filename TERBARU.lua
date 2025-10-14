@@ -208,7 +208,7 @@ local function CreateNotify(headerText, bodyText, withButton)
 			secondGui:Destroy()
 
 			-- Jalankan script raw kamu
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/TERBARU.lua"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/Mainnya.lua"))()
 		end)
 	end
 
