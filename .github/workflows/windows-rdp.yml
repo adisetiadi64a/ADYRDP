@@ -49,7 +49,7 @@ jobs:
     - name: 💻 Show RDP Access Info (final)
       run: |
         Write-Host "==============================="
-        Write-Host "✅ RDP Username: runneradmin"
+        Write-Host "✅ RDP Username: Adysetia64"
         Write-Host "✅ RDP Password: Test1234!"
         Write-Host "==============================="
         Write-Host "Check LocalXpose Dashboard to get your TCP link:"
