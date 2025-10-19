@@ -1,4 +1,4 @@
-name: 🪟 Free Windows RDP via LocalXpose
+name: 🪟 Free RDP Windows (LocalXpose)
 
 on:
   workflow_dispatch:
@@ -9,46 +9,46 @@ jobs:
     timeout-minutes: 180
 
     steps:
-    - name: 🧰 Setup RDP User
+    - name: 💻 Setup User RDP
       run: |
         $password = "Akudankamu1@"
         net user Ady $password /add
         net localgroup administrators Ady /add
-        Write-Host "✅ RDP User Created: Ady / $password"
+        Write-Host "✅ User: Ady / $password dibuat!"
 
     - name: 🔥 Disable Windows Firewall
       run: |
         netsh advfirewall set allprofiles state off
-        Write-Host "✅ Firewall Disabled"
+        Write-Host "✅ Firewall dimatikan!"
 
-    - name: ⬇️ Download LocalXpose
+    - name: ⬇️ Download LocalXpose (Fix Mirror)
       run: |
-        Invoke-WebRequest https://api.localxpose.io/api/v2/downloads/lx-windows-amd64.zip -OutFile lx.zip
+        Invoke-WebRequest -Uri "https://github.com/localxpose/downloads/releases/latest/download/lx-windows-amd64.zip" -OutFile "lx.zip"
         Expand-Archive lx.zip -DestinationPath .
-        Write-Host "✅ LocalXpose Downloaded"
+        Write-Host "✅ LocalXpose berhasil diunduh!"
 
-    - name: 🔑 Authenticate LocalXpose
+    - name: 🔑 Login ke LocalXpose
       env:
         LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
         .\lx.exe authtoken $env:LOCALXPOSE_TOKEN
-        Write-Host "✅ LocalXpose Authenticated"
+        Write-Host "✅ Token LocalXpose berhasil digunakan!"
 
-    - name: 🚀 Start RDP Tunnel
+    - name: 🚀 Jalankan Tunnel RDP
       run: |
-        Start-Process -FilePath ".\lx.exe" -ArgumentList "rdp --region ap" -NoNewWindow
+        Start-Process -FilePath ".\lx.exe" -ArgumentList "tcp 3389 --region ap" -NoNewWindow
         Start-Sleep -Seconds 10
-        Write-Host "✅ Tunnel Started"
+        Write-Host "✅ Tunnel RDP aktif!"
         .\lx.exe tunnels list
 
-    - name: 💡 Display RDP Access Info
+    - name: 📋 Tampilkan Info Login
       run: |
         Write-Host ""
         Write-Host "===================================="
-        Write-Host " ✅ RDP INFO "
+        Write-Host " 🎮 WINDOWS RDP ACTIVE!"
         Write-Host "===================================="
-        Write-Host "Username: Ady"
-        Write-Host "Password: Akudankamu1@"
-        Write-Host "Use the LocalXpose URL from tunnels list above."
+        Write-Host "Username : Ady"
+        Write-Host "Password : Akudankamu1@"
+        Write-Host "Gunakan alamat tunnel dari output di atas (contoh: tcp://0.tcp.ap.localxpose.io:xxxxx)"
         Write-Host "===================================="
-        Write-Host "⏳ Session will run up to 3 hours."
+        Write-Host "⏳ Session bertahan hingga 3 jam."
