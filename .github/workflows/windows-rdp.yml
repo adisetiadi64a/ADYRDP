@@ -36,9 +36,9 @@ jobs:
       run: |
         $out = $false
         $targets = @(
-          "https://api.localxpose.io/api/v2/downloads/lx-windows-386.zip",
-          "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-386.zip",
-          "https://github.com/localxpose/cli/releases/latest/download/lx-windows-386.zip"
+          "https://api.localxpose.io/api/v2/downloads/lx-windows-amd64.zip",
+          "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-amd64.zip",
+          "https://github.com/localxpose/cli/releases/latest/download/lx-windows-amd64.zip"
         )
         foreach ($u in $targets) {
           Write-Host "Trying: $u"
@@ -79,4 +79,26 @@ jobs:
     - name: 🚀 Start LocalXpose TCP Tunnel (RDP)
       run: |
         # Start tunnel in background and capture output to a file
-        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel tcp --to 3389" -
+        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel tcp --to 3389" -NoNewWindow -RedirectStandardOutput "tunnel.out" -RedirectStandardError "tunnel.err"
+        Start-Sleep -Seconds 6
+        Write-Host "Process started, waiting for tunnel info..."
+        Start-Sleep -Seconds 6
+        if (Test-Path ".\tunnel.out") {
+          Get-Content .\tunnel.out | Select-String -Pattern "tcp://" -AllMatches | ForEach-Object { Write-Host $_.Line }
+        }
+        # also list tunnels (some versions)
+        .\localxpose.exe tunnels list
+
+    - name: 🖥️ Show RDP Access Info (final)
+      run: |
+        Write-Host "========================================"
+        Write-Host "RDP CREDENTIALS:"
+        Write-Host "Username: $env:USER"
+        Write-Host "Password: $env:PASS"
+        Write-Host "----------------------------------------"
+        Write-Host "Tunnel output (tunnel.out):"
+        if (Test-Path ".\tunnel.out") { Get-Content .\tunnel.out }
+        Write-Host "If you don't see tcp://... in output above, check tunnel.err"
+        if (Test-Path ".\tunnel.err") { Write-Host "`n--- ERR ---`n"; Get-Content .\tunnel.err }
+        Write-Host "========================================"
+        Write-Host "Catatan: Masukkan alamat tcp://host:port ke Remote Desktop client (mstsc atau RD client)."
