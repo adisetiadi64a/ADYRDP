@@ -1,4 +1,4 @@
-name: Free RDP via LocalXpose (Use lx.exe from repo)
+name: Free RDP via LocalXpose (auto-fix path)
 
 on:
   workflow_dispatch:
@@ -10,6 +10,7 @@ jobs:
 
     steps:
     - name: 🧰 Setup RDP User
+      shell: powershell
       run: |
         $User = "runneradmin"
         $Pass = "Test1234!"
@@ -27,21 +28,38 @@ jobs:
         Write-Host "✅ User ready: $User"
 
     - name: 🔥 Disable Windows Firewall (All Profiles)
+      shell: powershell
       run: |
         Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
         Write-Host "✅ Windows Firewall disabled (Domain, Private, Public)."
 
-- name: Use local lx.exe (uploaded to repo)
-  run: |
-    if (Test-Path "./.github/workflows/lx.exe") {
-      Copy-Item "./.github/workflows/lx.exe" "./lx.exe"
-      Write-Output "✅ lx.exe found and copied successfully."
-    } else {
-      Write-Error "❌ lx.exe not found in .github/workflows/. Please upload it."
-      exit 1
-    }
+    - name: ⬇️ Locate lx.exe (root or .github/workflows) and prepare binary
+      shell: powershell
+      run: |
+        $found = $false
+        $candidates = @(
+          "$PWD\lx.exe",
+          "$PWD\.github\workflows\lx.exe",
+          "$PWD\.github\lx.exe",
+          "$PWD\bin\lx.exe"
+        )
+        foreach ($p in $candidates) {
+          if (Test-Path $p) {
+            Copy-Item -Path $p -Destination ".\localxpose.exe" -Force
+            Write-Host "✅ Found lx.exe at: $p"
+            $found = $true
+            break
+          }
+        }
+        if (-not $found) {
+          Write-Error "❌ lx.exe not found in repo. Upload lx.exe to repo root or .github/workflows/ and re-run."
+          exit 1
+        }
+        # sanity check: run version
+        .\localxpose.exe version
 
     - name: 🔑 Authenticate LocalXpose (uses repo secret)
+      shell: powershell
       env:
         LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
@@ -53,19 +71,51 @@ jobs:
         Write-Host "✅ LocalXpose authtoken applied."
 
     - name: 🚀 Start LocalXpose TCP Tunnel (RDP) & capture output
+      shell: powershell
       run: |
-        # Start LocalXpose tunnel in background and redirect stdout/stderr to files
-        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel", "tcp", "--to", "3389" -NoNewWindow -RedirectStandardOutput ".\tunnel.out" -RedirectStandardError ".\tunnel.err"
-        Write-Host "Started localxpose tunnel process, waiting for output..."
-        Start-Sleep -Seconds 10
-        # show some output lines that usually contain tcp://
-        if (Test-Path ".\tunnel.out") {
-          Get-Content .\tunnel.out | Select-String -Pattern "tcp://" -AllMatches | ForEach-Object { Write-Host $_.Line }
+        # start the tunnel in background and capture stdout/stderr
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = (Resolve-Path .\localxpose.exe).Path
+        $psi.Arguments = "tunnel tcp --to 3389"
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError  = $true
+        $psi.UseShellExecute = $false
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        Start-Sleep -Seconds 8
+
+        # read available output lines (non-blocking read)
+        $out = ""
+        try {
+          if (-not $proc.HasExited) {
+            $out = $proc.StandardOutput.ReadToEnd()
+            $err = $proc.StandardError.ReadToEnd()
+          } else {
+            $out = $proc.StandardOutput.ReadToEnd()
+            $err = $proc.StandardError.ReadToEnd()
+          }
+        } catch {
+          $out = ""
+          $err = $_.Exception.Message
         }
-        # also run list command (some builds print tunnel info)
-        .\localxpose.exe tunnels list | ForEach-Object { Write-Host $_ }
+
+        # write to files for later inspection
+        $out | Out-File -FilePath .\tunnel.out -Encoding utf8
+        $err | Out-File -FilePath .\tunnel.err -Encoding utf8
+
+        Write-Host "=== localxpose stdout ==="
+        Get-Content .\tunnel.out | ForEach-Object { Write-Host $_ }
+        Write-Host "=== localxpose stderr ==="
+        Get-Content .\tunnel.err | ForEach-Object { Write-Host $_ }
+
+        # Attempt to list tunnels (some builds show info here)
+        try {
+          .\localxpose.exe tunnels list | ForEach-Object { Write-Host $_ }
+        } catch {
+          Write-Host "Note: 'tunnels list' may not be available on this build."
+        }
 
     - name: 🖥️ Show RDP Access Info (final)
+      shell: powershell
       run: |
         Write-Host "========================================"
         Write-Host "RDP CREDENTIALS"
@@ -74,13 +124,15 @@ jobs:
         Write-Host "----------------------------------------"
         Write-Host "Tunnel output (tunnel.out):"
         if (Test-Path ".\tunnel.out") {
+          # show any tcp:// lines first (common pattern)
+          Get-Content .\tunnel.out | Select-String -Pattern "tcp://" -AllMatches | ForEach-Object { Write-Host $_.Line }
+          Write-Host "`nFull stdout:"
           Get-Content .\tunnel.out
         } else {
           Write-Host "(tunnel.out not found)"
         }
-        Write-Host "If you don't see tcp://host:port above, check tunnel.err for errors:"
         if (Test-Path ".\tunnel.err") {
-          Write-Host "--- tunnel.err ---"
+          Write-Host "`n--- tunnel.err ---"
           Get-Content .\tunnel.err
         }
         Write-Host "========================================"
