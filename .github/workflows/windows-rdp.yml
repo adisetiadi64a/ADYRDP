@@ -1,4 +1,4 @@
-name: 🪟 Free RDP Windows (LocalXpose)
+name: 🪟 Free Windows RDP (LocalXpose Fixed)
 
 on:
   workflow_dispatch:
@@ -21,9 +21,9 @@ jobs:
         netsh advfirewall set allprofiles state off
         Write-Host "✅ Firewall dimatikan!"
 
-    - name: ⬇️ Download LocalXpose (Fix Mirror)
+    - name: ⬇️ Download LocalXpose (Working Mirror)
       run: |
-        Invoke-WebRequest -Uri "https://github.com/localxpose/downloads/releases/latest/download/lx-windows-amd64.zip" -OutFile "lx.zip"
+        Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-amd64.zip" -OutFile "lx.zip"
         Expand-Archive lx.zip -DestinationPath .
         Write-Host "✅ LocalXpose berhasil diunduh!"
 
@@ -45,10 +45,10 @@ jobs:
       run: |
         Write-Host ""
         Write-Host "===================================="
-        Write-Host " 🎮 WINDOWS RDP ACTIVE!"
+        Write-Host " 🎮 WINDOWS RDP AKTIF"
         Write-Host "===================================="
         Write-Host "Username : Ady"
         Write-Host "Password : Akudankamu1@"
-        Write-Host "Gunakan alamat tunnel dari output di atas (contoh: tcp://0.tcp.ap.localxpose.io:xxxxx)"
+        Write-Host "Gunakan alamat dari output di atas (contoh: tcp://0.tcp.ap.localxpose.io:xxxxx)"
         Write-Host "===================================="
         Write-Host "⏳ Session bertahan hingga 3 jam."
