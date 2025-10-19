@@ -1,4 +1,4 @@
-name: Free RDP via LocalXpose (Fixed 2025)
+name: Free RDP via LocalXpose (Fixed 2025 - New URL)
 
 on:
   workflow_dispatch:
@@ -22,17 +22,17 @@ jobs:
         Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
         Write-Host "✅ Firewall disabled for all profiles."
 
-    - name: ⚙️ Download LocalXpose binary (auto-fix path)
+    - name: ⚙️ Download LocalXpose binary (Updated URL)
       run: |
-        Invoke-WebRequest -Uri "https://files.localxpose.io/localxpose/latest/windows-amd64.zip" -OutFile "lx.zip"
-        Expand-Archive -Path "lx.zip" -DestinationPath "."
-        $exe = Get-ChildItem -Path "." -Filter "lx.exe" -Recurse | Select-Object -First 1
-        if ($exe -eq $null) {
-          Write-Error "❌ lx.exe not found after extraction."
+        $url = "https://api.localxpose.io/api/downloads/loclx-windows-amd64.zip"
+        Write-Host "⬇️ Downloading LocalXpose from $url"
+        Invoke-WebRequest -Uri $url -OutFile "loclx.zip"
+        Expand-Archive -Path "loclx.zip" -DestinationPath "."
+        if (-not (Test-Path ".\loclx.exe")) {
+          Write-Error "❌ loclx.exe not found after extraction."
           exit 1
         }
-        Move-Item $exe.FullName ".\lx.exe" -Force
-        Write-Host "✅ LocalXpose binary prepared successfully."
+        Write-Host "✅ LocalXpose binary ready!"
 
     - name: 🔑 Authenticate LocalXpose (use repo secret)
       env:
@@ -42,12 +42,12 @@ jobs:
           Write-Error "❌ LOCALXPOSE_TOKEN secret missing!"
           exit 1
         }
-        ./lx.exe account login --token $env:TOKEN
+        .\loclx.exe account login --token $env:TOKEN
         Write-Host "✅ LocalXpose authenticated."
 
     - name: 🚀 Start LocalXpose TCP Tunnel (RDP)
       run: |
-        Start-Process -FilePath ".\lx.exe" -ArgumentList "tunnel", "tcp", "--to", "3389" -NoNewWindow
+        Start-Process -FilePath ".\loclx.exe" -ArgumentList "tunnel", "tcp", "--to", "3389" -NoNewWindow
         Start-Sleep -Seconds 10
         Write-Host "✅ Tunnel started successfully."
 
@@ -56,6 +56,5 @@ jobs:
         Write-Host "===================================="
         Write-Host "✅ USERNAME: Adysetia64"
         Write-Host "✅ PASSWORD: Test1234!"
-        Write-Host "Check your TCP link on:"
-        Write-Host "👉 https://localxpose.io/dashboard/tunnels"
+        Write-Host "👉 Check your tunnel on: https://localxpose.io/dashboard/tunnels"
         Write-Host "===================================="
