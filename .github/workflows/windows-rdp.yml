@@ -1,0 +1,54 @@
+name: 🪟 Free Windows RDP via LocalXpose
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 180
+
+    steps:
+    - name: 🧰 Setup RDP User
+      run: |
+        $password = "Akudankamu1@"
+        net user Ady $password /add
+        net localgroup administrators Ady /add
+        Write-Host "✅ RDP User Created: Ady / $password"
+
+    - name: 🔥 Disable Windows Firewall
+      run: |
+        netsh advfirewall set allprofiles state off
+        Write-Host "✅ Firewall Disabled"
+
+    - name: ⬇️ Download LocalXpose
+      run: |
+        Invoke-WebRequest https://api.localxpose.io/api/v2/downloads/lx-windows-amd64.zip -OutFile lx.zip
+        Expand-Archive lx.zip -DestinationPath .
+        Write-Host "✅ LocalXpose Downloaded"
+
+    - name: 🔑 Authenticate LocalXpose
+      env:
+        LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
+      run: |
+        .\lx.exe authtoken $env:LOCALXPOSE_TOKEN
+        Write-Host "✅ LocalXpose Authenticated"
+
+    - name: 🚀 Start RDP Tunnel
+      run: |
+        Start-Process -FilePath ".\lx.exe" -ArgumentList "rdp --region ap" -NoNewWindow
+        Start-Sleep -Seconds 10
+        Write-Host "✅ Tunnel Started"
+        .\lx.exe tunnels list
+
+    - name: 💡 Display RDP Access Info
+      run: |
+        Write-Host ""
+        Write-Host "===================================="
+        Write-Host " ✅ RDP INFO "
+        Write-Host "===================================="
+        Write-Host "Username: Ady"
+        Write-Host "Password: Akudankamu1@"
+        Write-Host "Use the LocalXpose URL from tunnels list above."
+        Write-Host "===================================="
+        Write-Host "⏳ Session will run up to 3 hours."
