@@ -1,54 +1,82 @@
-name: 🪟 Free Windows RDP (LocalXpose Fixed)
+name: Free RDP via LocalXpose (Full Steps)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  rdp:
     runs-on: windows-latest
     timeout-minutes: 180
 
     steps:
-    - name: 💻 Setup User RDP
+    - name: 🧰 Setup RDP User
       run: |
-        $password = "Akudankamu1@"
-        net user Ady $password /add
-        net localgroup administrators Ady /add
-        Write-Host "✅ User: Ady / $password dibuat!"
+        # username & password (ubah kalau mau)
+        $User = "runneradmin"
+        $Pass = "Test1234!"
+        # create user if not exists, set password and add to admins / remote desktop users
+        if (-not (Get-LocalUser -Name $User -ErrorAction SilentlyContinue)) {
+          net user $User $Pass /add
+        } else {
+          net user $User $Pass
+        }
+        net localgroup administrators $User /add
+        net localgroup "Remote Desktop Users" $User /add
+        Write-Host "USER=$User" >> $env:GITHUB_ENV
+        Write-Host "PASS=$Pass" >> $env:GITHUB_ENV
+        Write-Host "✅ User created or updated: $User"
 
-    - name: 🔥 Disable Windows Firewall
+    - name: 🔥 Disable Windows Firewall (All Profiles)
       run: |
-        netsh advfirewall set allprofiles state off
-        Write-Host "✅ Firewall dimatikan!"
+        # Turn off firewall for Domain/Private/Public
+        Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
+        Write-Host "✅ Windows Firewall disabled (all profiles)."
 
-    - name: ⬇️ Download LocalXpose (Working Mirror)
+    - name: ⬇️ Download LocalXpose (try multiple mirrors)
       run: |
-        Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-amd64.zip" -OutFile "lx.zip"
-        Expand-Archive lx.zip -DestinationPath .
-        Write-Host "✅ LocalXpose berhasil diunduh!"
+        $out = $false
+        $targets = @(
+          "https://api.localxpose.io/api/v2/downloads/lx-windows-386.zip",
+          "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-386.zip",
+          "https://github.com/localxpose/cli/releases/latest/download/lx-windows-386.zip"
+        )
+        foreach ($u in $targets) {
+          Write-Host "Trying: $u"
+          try {
+            Invoke-WebRequest -Uri $u -OutFile "lx.zip" -UseBasicParsing -ErrorAction Stop
+            Write-Host "Downloaded from $u"
+            $out = $true
+            break
+          } catch {
+            Write-Host "Failed: $u -> $($_.Exception.Message)"
+          }
+        }
+        if (-not $out) {
+          Write-Error "All download attempts failed. Consider uploading lx.exe to your repo or use another mirror."
+          exit 1
+        }
+        Expand-Archive -Path "lx.zip" -DestinationPath .
+        # find exe (common names: lx.exe or localxpose.exe)
+        if (Test-Path ".\lx.exe") { Rename-Item ".\lx.exe" -NewName "localxpose.exe" -Force }
+        if (-not (Test-Path ".\localxpose.exe")) {
+          # try search in extracted folder
+          $found = Get-ChildItem -Recurse -Filter "lx.exe" -File | Select-Object -First 1
+          if ($found) { Copy-Item $found.FullName -Destination ".\localxpose.exe" -Force } else { Write-Error "localxpose binary not found after extraction"; exit 1 }
+        }
+        Write-Host "✅ localxpose.exe ready."
 
-    - name: 🔑 Login ke LocalXpose
+    - name: 🔑 Authenticate LocalXpose
       env:
         LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
-        .\lx.exe authtoken $env:LOCALXPOSE_TOKEN
-        Write-Host "✅ Token LocalXpose berhasil digunakan!"
+        if (-not $env:LOCALXPOSE_TOKEN) {
+          Write-Error "LOCALXPOSE_TOKEN is empty. Set the secret in repository settings."
+          exit 1
+        }
+        .\localxpose.exe authtoken $env:LOCALXPOSE_TOKEN
+        Write-Host "✅ Auth token applied."
 
-    - name: 🚀 Jalankan Tunnel RDP
+    - name: 🚀 Start LocalXpose TCP Tunnel (RDP)
       run: |
-        Start-Process -FilePath ".\lx.exe" -ArgumentList "tcp 3389 --region ap" -NoNewWindow
-        Start-Sleep -Seconds 10
-        Write-Host "✅ Tunnel RDP aktif!"
-        .\lx.exe tunnels list
-
-    - name: 📋 Tampilkan Info Login
-      run: |
-        Write-Host ""
-        Write-Host "===================================="
-        Write-Host " 🎮 WINDOWS RDP AKTIF"
-        Write-Host "===================================="
-        Write-Host "Username : Ady"
-        Write-Host "Password : Akudankamu1@"
-        Write-Host "Gunakan alamat dari output di atas (contoh: tcp://0.tcp.ap.localxpose.io:xxxxx)"
-        Write-Host "===================================="
-        Write-Host "⏳ Session bertahan hingga 3 jam."
+        # Start tunnel in background and capture output to a file
+        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel tcp --to 3389" -
