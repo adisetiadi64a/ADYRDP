@@ -24,9 +24,9 @@ jobs:
 
     - name: ⚙️ Download LocalXpose binary
       run: |
-        Invoke-WebRequest -Uri "https://files.localxpose.io/localxpose/latest/windows-amd64.zip" -OutFile "lx.zip"
-        Expand-Archive lx.zip -DestinationPath .
-        Rename-Item -Path ".\windows-amd64\lx.exe" -NewName "lx.exe"
+        Invoke-WebRequest -Uri "https://api.localxpose.io/api/downloads/loclx-windows-amd64.zip" -OutFile "loclx-windows-amd64.zip"
+        Expand-Archive loclx-windows-amd64.zip -DestinationPath .
+        Rename-Item -Path ".\loclx-windows-amd64\loclx.exe" -NewName "loclx.exe"
         Write-Host "✅ LocalXpose binary downloaded successfully."
 
     - name: 🔑 Authenticate LocalXpose (use repo secret)
