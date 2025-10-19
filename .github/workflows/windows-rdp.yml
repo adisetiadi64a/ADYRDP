@@ -1,4 +1,4 @@
-name: Free RDP via LocalXpose (Full Steps)
+name: Free RDP via LocalXpose (Use lx.exe from repo)
 
 on:
   workflow_dispatch:
@@ -11,94 +11,79 @@ jobs:
     steps:
     - name: 🧰 Setup RDP User
       run: |
-        # username & password (ubah kalau mau)
         $User = "runneradmin"
         $Pass = "Test1234!"
-        # create user if not exists, set password and add to admins / remote desktop users
         if (-not (Get-LocalUser -Name $User -ErrorAction SilentlyContinue)) {
           net user $User $Pass /add
+          Write-Host "Created local user $User"
         } else {
           net user $User $Pass
+          Write-Host "Updated password for $User"
         }
         net localgroup administrators $User /add
         net localgroup "Remote Desktop Users" $User /add
         Write-Host "USER=$User" >> $env:GITHUB_ENV
         Write-Host "PASS=$Pass" >> $env:GITHUB_ENV
-        Write-Host "✅ User created or updated: $User"
+        Write-Host "✅ User ready: $User"
 
     - name: 🔥 Disable Windows Firewall (All Profiles)
       run: |
-        # Turn off firewall for Domain/Private/Public
         Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
-        Write-Host "✅ Windows Firewall disabled (all profiles)."
+        Write-Host "✅ Windows Firewall disabled (Domain, Private, Public)."
 
-    - name: ⬇️ Download LocalXpose (try multiple mirrors)
+    - name: ⬇️ Use local lx.exe (uploaded to repo)
       run: |
-        $out = $false
-        $targets = @(
-          "https://api.localxpose.io/api/v2/downloads/lx-windows-amd64.zip",
-          "https://cdn.jsdelivr.net/gh/ganeshkumar-s/localxpose-mirror/lx-windows-amd64.zip",
-          "https://github.com/localxpose/cli/releases/latest/download/lx-windows-amd64.zip"
-        )
-        foreach ($u in $targets) {
-          Write-Host "Trying: $u"
-          try {
-            Invoke-WebRequest -Uri $u -OutFile "lx.zip" -UseBasicParsing -ErrorAction Stop
-            Write-Host "Downloaded from $u"
-            $out = $true
-            break
-          } catch {
-            Write-Host "Failed: $u -> $($_.Exception.Message)"
-          }
-        }
-        if (-not $out) {
-          Write-Error "All download attempts failed. Consider uploading lx.exe to your repo or use another mirror."
+        if (Test-Path "./lx.exe") {
+          Copy-Item "./lx.exe" "./localxpose.exe" -Force
+          Write-Host "✅ Found lx.exe in repo root and copied to localxpose.exe"
+        } else {
+          Write-Error "❌ lx.exe not found in repo root. Upload lx.exe to repo root and re-run."
           exit 1
         }
-        Expand-Archive -Path "lx.zip" -DestinationPath .
-        # find exe (common names: lx.exe or localxpose.exe)
-        if (Test-Path ".\lx.exe") { Rename-Item ".\lx.exe" -NewName "localxpose.exe" -Force }
-        if (-not (Test-Path ".\localxpose.exe")) {
-          # try search in extracted folder
-          $found = Get-ChildItem -Recurse -Filter "lx.exe" -File | Select-Object -First 1
-          if ($found) { Copy-Item $found.FullName -Destination ".\localxpose.exe" -Force } else { Write-Error "localxpose binary not found after extraction"; exit 1 }
-        }
-        Write-Host "✅ localxpose.exe ready."
+        # Ensure executable permissions (if needed)
+        & .\localxpose.exe version
 
-    - name: 🔑 Authenticate LocalXpose
+    - name: 🔑 Authenticate LocalXpose (uses repo secret)
       env:
         LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
         if (-not $env:LOCALXPOSE_TOKEN) {
-          Write-Error "LOCALXPOSE_TOKEN is empty. Set the secret in repository settings."
+          Write-Error "LOCALXPOSE_TOKEN secret is not set. Add it in repository Settings → Secrets."
           exit 1
         }
         .\localxpose.exe authtoken $env:LOCALXPOSE_TOKEN
-        Write-Host "✅ Auth token applied."
+        Write-Host "✅ LocalXpose authtoken applied."
 
-    - name: 🚀 Start LocalXpose TCP Tunnel (RDP)
+    - name: 🚀 Start LocalXpose TCP Tunnel (RDP) & capture output
       run: |
-        # Start tunnel in background and capture output to a file
-        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel tcp --to 3389" -NoNewWindow -RedirectStandardOutput "tunnel.out" -RedirectStandardError "tunnel.err"
-        Start-Sleep -Seconds 6
-        Write-Host "Process started, waiting for tunnel info..."
-        Start-Sleep -Seconds 6
+        # Start LocalXpose tunnel in background and redirect stdout/stderr to files
+        Start-Process -FilePath ".\localxpose.exe" -ArgumentList "tunnel", "tcp", "--to", "3389" -NoNewWindow -RedirectStandardOutput ".\tunnel.out" -RedirectStandardError ".\tunnel.err"
+        Write-Host "Started localxpose tunnel process, waiting for output..."
+        Start-Sleep -Seconds 10
+        # show some output lines that usually contain tcp://
         if (Test-Path ".\tunnel.out") {
           Get-Content .\tunnel.out | Select-String -Pattern "tcp://" -AllMatches | ForEach-Object { Write-Host $_.Line }
         }
-        # also list tunnels (some versions)
-        .\localxpose.exe tunnels list
+        # also run list command (some builds print tunnel info)
+        .\localxpose.exe tunnels list | ForEach-Object { Write-Host $_ }
 
     - name: 🖥️ Show RDP Access Info (final)
       run: |
         Write-Host "========================================"
-        Write-Host "RDP CREDENTIALS:"
+        Write-Host "RDP CREDENTIALS"
         Write-Host "Username: $env:USER"
         Write-Host "Password: $env:PASS"
         Write-Host "----------------------------------------"
         Write-Host "Tunnel output (tunnel.out):"
-        if (Test-Path ".\tunnel.out") { Get-Content .\tunnel.out }
-        Write-Host "If you don't see tcp://... in output above, check tunnel.err"
-        if (Test-Path ".\tunnel.err") { Write-Host "`n--- ERR ---`n"; Get-Content .\tunnel.err }
+        if (Test-Path ".\tunnel.out") {
+          Get-Content .\tunnel.out
+        } else {
+          Write-Host "(tunnel.out not found)"
+        }
+        Write-Host "If you don't see tcp://host:port above, check tunnel.err for errors:"
+        if (Test-Path ".\tunnel.err") {
+          Write-Host "--- tunnel.err ---"
+          Get-Content .\tunnel.err
+        }
         Write-Host "========================================"
-        Write-Host "Catatan: Masukkan alamat tcp://host:port ke Remote Desktop client (mstsc atau RD client)."
+        Write-Host "Use the tcp://host:port shown above in your RDP client (mstsc)."
