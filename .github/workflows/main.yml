@@ -1,39 +1,37 @@
-name: Ady RDP
+name: Ady RDP Free (LocalXpose)
 
 on:
   workflow_dispatch:
 
 jobs:
-  secure-rdp:
+  free-rdp:
     runs-on: windows-latest
     timeout-minutes: 3600
 
     steps:
-      - name: Configure Core RDP Settings
+      - name: ⚙️ Configure RDP and Firewall
         run: |
-          # Enable Remote Desktop and disable Network Level Authentication (if needed)
+          # Enable RDP
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' `
-                             -Name "fDenyTSConnections" -Value 0 -Force
+            -Name "fDenyTSConnections" -Value 0 -Force
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-                             -Name "UserAuthentication" -Value 0 -Force
+            -Name "UserAuthentication" -Value 0 -Force
           Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-                             -Name "SecurityLayer" -Value 0 -Force
+            -Name "SecurityLayer" -Value 0 -Force
 
-          # Remove any existing rule with the same name to avoid duplication
-          netsh advfirewall firewall delete rule name="RDP-Tailscale"
-          
-          # Allow incoming connection on port 3389
-          netsh advfirewall firewall add rule name="RDP-Tailscale" `
-            dir=in action=allow protocol=TCP localport=3389
+          # Disable Firewall (All Profiles)
+          Write-Host "Disabling Windows Firewall..."
+          netsh advfirewall set allprofiles state off
+          Write-Host "Windows Firewall disabled successfully."
 
-          # Restart Remote Desktop service
+          # Restart RDP service
           Restart-Service -Name TermService -Force
 
-      - name: Create RDP User with Static Password
+      - name: 👤 Create RDP User
         run: |
           $password = "Akudankamu1@,"
           $securePass = ConvertTo-SecureString $password -AsPlainText -Force
-
+          
           if (-not (Get-LocalUser -Name "Ady" -ErrorAction SilentlyContinue)) {
               New-LocalUser -Name "Ady" -Password $securePass -AccountNeverExpires
               Add-LocalGroupMember -Group "Administrators" -Member "Ady"
@@ -44,54 +42,36 @@ jobs:
 
           echo "RDP_CREDS=User: Ady | Password: $password" >> $env:GITHUB_ENV
 
-      - name: Install Tailscale
+      - name: 🌐 Download LocalXpose
         run: |
-          $tsUrl = "https://pkgs.tailscale.com/stable/tailscale-setup-1.82.0-amd64.msi"
-          $installerPath = "$env:TEMP\tailscale.msi"
-          
-          Invoke-WebRequest -Uri $tsUrl -OutFile $installerPath
-          Start-Process msiexec.exe -ArgumentList "/i", "`"$installerPath`"", "/quiet", "/norestart" -Wait
-          Remove-Item $installerPath -Force
+          Invoke-WebRequest https://localxpose.io/downloads/lx-windows-amd64.zip -OutFile lx.zip
+          Expand-Archive lx.zip -DestinationPath $env:USERPROFILE
+          Remove-Item lx.zip -Force
+          echo "LX_PATH=$env:USERPROFILE\lx.exe" >> $env:GITHUB_ENV
 
-      - name: Establish Tailscale Connection
+      - name: 🔑 Authenticate LocalXpose
         run: |
-          & "$env:ProgramFiles\Tailscale\tailscale.exe" up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=gh-runner-$env:GITHUB_RUN_ID
-          
-          $tsIP = $null
-          $retries = 0
-          while (-not $tsIP -and $retries -lt 10) {
-              $tsIP = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
-              Start-Sleep -Seconds 5
-              $retries++
-          }
-          
-          if (-not $tsIP) {
-              Write-Error "Tailscale IP not assigned. Exiting."
-              exit 1
-          }
-          echo "TAILSCALE_IP=$tsIP" >> $env:GITHUB_ENV
-      
-      - name: Verify RDP Accessibility
-        run: |
-          Write-Host "Tailscale IP: $env:TAILSCALE_IP"
-          
-          $testResult = Test-NetConnection -ComputerName $env:TAILSCALE_IP -Port 3389
-          if (-not $testResult.TcpTestSucceeded) {
-              Write-Error "TCP connection to RDP port 3389 failed"
-              exit 1
-          }
-          Write-Host "TCP connectivity successful!"
+          & "$env:USERPROFILE\lx.exe" authtoken ${{ secrets.LOCALXPOSE_TOKEN }}
 
-      - name: Maintain Connection
+      - name: 🚀 Start Public RDP Tunnel
         run: |
-          Write-Host "`n=== RDP ACCESS ==="
-          Write-Host "Address: $env:TAILSCALE_IP"
+          Start-Process -NoNewWindow -FilePath "$env:USERPROFILE\lx.exe" -ArgumentList "tcp --port 3389"
+          Start-Sleep -Seconds 10
+          Write-Host "🔍 Fetching tunnel info..."
+          & "$env:USERPROFILE\lx.exe" tunnels list
+
+      - name: 🖥️ Display RDP Access Info
+        run: |
+          Write-Host "`n========================================"
+          Write-Host "🎯 RDP SERVER IS READY!"
           Write-Host "Username: Ady"
-          Write-Host "Password: $(echo $env:RDP_CREDS)"
-          Write-Host "==================`n"
-          
+          Write-Host "Password: Akudankamu1@,"
+          Write-Host "----------------------------------------"
+          Write-Host "🌐 To find your RDP address, check logs above (LocalXpose Tunnel info)"
+          Write-Host "Example: tcp://1.tcp.ap.localxpose.io:12345"
+          Write-Host "========================================`n"
+
           while ($true) {
-              Write-Host "[$(Get-Date)] RDP Active - Use Ctrl+C in workflow to terminate"
+              Write-Host "[$(Get-Date)] RDP Active - Press Stop Workflow to end session."
               Start-Sleep -Seconds 300
           }
-          
