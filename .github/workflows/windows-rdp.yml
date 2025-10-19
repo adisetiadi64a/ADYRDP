@@ -11,7 +11,7 @@ jobs:
     steps:
     - name: 🧩 Set up user
       run: |
-        $user = "runneradmin"
+        $user = "Adysetia64"
         $pass = ConvertTo-SecureString "Test1234!" -AsPlainText -Force
         New-LocalUser $user -Password $pass
         Add-LocalGroupMember -Group "Administrators" -Member $user
