@@ -42,13 +42,10 @@ jobs:
 
           echo "RDP_CREDS=User: Ady | Password: $password" >> $env:GITHUB_ENV
 
-      - name: 🌐 Download LocalXpose
-        run: |
-          Invoke-WebRequest https://localxpose.io/downloads/lx-windows-amd64.zip -OutFile lx.zip
-          Expand-Archive lx.zip -DestinationPath $env:USERPROFILE
-          Remove-Item lx.zip -Force
-          echo "LX_PATH=$env:USERPROFILE\lx.exe" >> $env:GITHUB_ENV
-
+      - name: 🧩 Download LocalXpose
+  run: |
+    Invoke-WebRequest https://api.localxpose.io/api/v2/downloads/lx-windows-amd64.zip -OutFile lx.zip
+    Expand-Archive lx.zip -DestinationPath .
       - name: 🔑 Authenticate LocalXpose
         run: |
           & "$env:USERPROFILE\lx.exe" authtoken ${{ secrets.LOCALXPOSE_TOKEN }}
