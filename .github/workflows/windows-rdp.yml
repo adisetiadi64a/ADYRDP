@@ -31,17 +31,15 @@ jobs:
         Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
         Write-Host "✅ Windows Firewall disabled (Domain, Private, Public)."
 
-    - name: ⬇️ Use local lx.exe (uploaded to repo)
-      run: |
-        if (Test-Path "./lx.exe") {
-          Copy-Item "./lx.exe" "./localxpose.exe" -Force
-          Write-Host "✅ Found lx.exe in repo root and copied to localxpose.exe"
-        } else {
-          Write-Error "❌ lx.exe not found in repo root. Upload lx.exe to repo root and re-run."
-          exit 1
-        }
-        # Ensure executable permissions (if needed)
-        & .\localxpose.exe version
+- name: Use local lx.exe (uploaded to repo)
+  run: |
+    if (Test-Path "./.github/workflows/lx.exe") {
+      Copy-Item "./.github/workflows/lx.exe" "./lx.exe"
+      Write-Output "✅ lx.exe found and copied successfully."
+    } else {
+      Write-Error "❌ lx.exe not found in .github/workflows/. Please upload it."
+      exit 1
+    }
 
     - name: 🔑 Authenticate LocalXpose (uses repo secret)
       env:
