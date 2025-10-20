@@ -1,60 +1,146 @@
-name: Free RDP via LocalXpose (Fixed 2025 - New URL)
+name: Free RDP via LocalXpose (Auto-print TCP URL)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  rdp:
     runs-on: windows-latest
-    timeout-minutes: 9999
+    timeout-minutes: 180
 
     steps:
     - name: 🌱 Set up user
+      shell: powershell
       run: |
-        $user = "Adysetia64"
-        $pass = ConvertTo-SecureString "Test1234!" -AsPlainText -Force
-        New-LocalUser $user -Password $pass
-        Add-LocalGroupMember -Group "Administrators" -Member $user
-        Write-Host "✅ User $user created successfully with password Test1234!"
+        $User="Adysetia64"
+        $PassPlain = "Test1234!"
+        $secure = ConvertTo-SecureString $PassPlain -AsPlainText -Force
+        if (-not (Get-LocalUser -Name $User -ErrorAction SilentlyContinue)) {
+          New-LocalUser -Name $User -Password $secure -PasswordNeverExpires:$true
+          Write-Host "Created user $User"
+        } else {
+          Set-LocalUser -Name $User -Password $secure
+          Write-Host "Updated password for $User"
+        }
+        Add-LocalGroupMember -Group "Administrators" -Member $User -ErrorAction SilentlyContinue
+        Add-LocalGroupMember -Group "Remote Desktop Users" -Member $User -ErrorAction SilentlyContinue
+        Write-Host "USER=$User" >> $env:GITHUB_ENV
+        Write-Host "PASS=$PassPlain" >> $env:GITHUB_ENV
 
     - name: 🔥 Disable Windows Firewall (All Profiles)
+      shell: powershell
       run: |
-        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False
+        Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
         Write-Host "✅ Firewall disabled for all profiles."
 
-    - name: ⚙️ Download LocalXpose binary (Updated URL)
+    - name: ⬇️ Download LocalXpose (new URL)
+      shell: powershell
       run: |
         $url = "https://api.localxpose.io/api/downloads/loclx-windows-amd64.zip"
-        Write-Host "⬇️ Downloading LocalXpose from $url"
-        Invoke-WebRequest -Uri $url -OutFile "loclx.zip"
+        Write-Host "Downloading LocalXpose from $url ..."
+        Invoke-WebRequest -Uri $url -OutFile "loclx.zip" -UseBasicParsing -ErrorAction Stop
         Expand-Archive -Path "loclx.zip" -DestinationPath "."
+        # after extraction the binary is loclx.exe (per your info)
         if (-not (Test-Path ".\loclx.exe")) {
-          Write-Error "❌ loclx.exe not found after extraction."
+          Write-Error "loclx.exe not found after extraction"
           exit 1
         }
-        Write-Host "✅ LocalXpose binary ready!"
+        Write-Host "✅ loclx.exe ready."
 
-    - name: 🔑 Authenticate LocalXpose (use repo secret)
+    - name: 🔑 Authenticate LocalXpose
+      shell: powershell
       env:
-        TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
+        LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
-        if (-not $env:TOKEN) {
-          Write-Error "❌ LOCALXPOSE_TOKEN secret missing!"
+        if (-not $env:LOCALXPOSE_TOKEN) {
+          Write-Error "LOCALXPOSE_TOKEN is not set in repo secrets"
           exit 1
         }
-        .\loclx.exe account login --token $env:TOKEN
-        Write-Host "✅ LocalXpose authenticated."
+        .\loclx.exe account login --token $env:LOCALXPOSE_TOKEN
+        Write-Host "✅ Authenticated to LocalXpose."
 
-    - name: 🚀 Start LocalXpose TCP Tunnel (RDP)
+    - name: 🚀 Start tunnel & capture tcp:// URL (prints directly)
+      shell: powershell
       run: |
-        Start-Process -FilePath ".\loclx.exe" -ArgumentList "tunnel", "tcp", "--to", "3389" -NoNewWindow
-        Start-Sleep -Seconds 10
-        Write-Host "✅ Tunnel started successfully."
+        $exe = (Resolve-Path ".\loclx.exe").Path
+        Write-Host "Starting: $exe tunnel tcp --to 3389"
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $exe
+        $psi.Arguments = "tunnel tcp --to 3389"
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError  = $true
+        $psi.UseShellExecute = $false
+        $psi.CreateNoWindow = $true
 
-    - name: 💻 Show RDP Access Info
+        $proc = [System.Diagnostics.Process]::Start($psi)
+
+        $stdout = ""
+        $stderr = ""
+        $found = $false
+        $regex = [regex]"tcp://[^\s:\/]+:\d+"
+
+        $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        $timeoutSec = 90
+
+        while (-not $proc.HasExited -and $sw.Elapsed.TotalSeconds -lt $timeoutSec) {
+          Start-Sleep -Milliseconds 500
+          try {
+            $chunk = $proc.StandardOutput.ReadToEnd()
+            if ($chunk) {
+              $stdout += $chunk
+              $matches = $regex.Matches($stdout)
+              if ($matches.Count -gt 0) {
+                $url = $matches[0].Value
+                Write-Host "✅ FOUND TCP URL: $url"
+                $found = $true
+                break
+              }
+            }
+            # also check stderr just in case
+            $errchunk = $proc.StandardError.ReadToEnd()
+            if ($errchunk) {
+              $stderr += $errchunk
+            }
+          } catch {
+            # non-fatal read errors - continue
+          }
+        }
+
+        if (-not $found) {
+          # try one final read after process exit
+          try {
+            $stdout += $proc.StandardOutput.ReadToEnd()
+            $stderr += $proc.StandardError.ReadToEnd()
+          } catch {}
+          $matches = $regex.Matches($stdout)
+          if ($matches.Count -gt 0) {
+            $url = $matches[0].Value
+            Write-Host "✅ FOUND TCP URL (final): $url"
+            $found = $true
+          }
+        }
+
+        if ($found) {
+          Write-Host "========================================"
+          Write-Host "RDP READY"
+          Write-Host "Username: $env:USER"
+          Write-Host "Password: $env:PASS"
+          Write-Host "Connect to: $url"
+          Write-Host "========================================"
+          # keep tunnel alive until workflow stopped (optional)
+          Write-Host "Tunnel will remain running while the job is active. Stop workflow to close."
+          # Wait indefinitely so user can connect (you can ctrl-C job to stop)
+          while ($true) { Start-Sleep -Seconds 300 }
+        } else {
+          Write-Host "=== STDOUT ==="
+          Write-Host $stdout
+          Write-Host "=== STDERR ==="
+          Write-Host $stderr
+          Write-Error "Timed out waiting for tcp:// URL from localxpose (timeout ${timeoutSec}s). Check token / dashboard."
+          exit 1
+        }
+
+    - name: 🧾 (never reached) Show diagnostics
+      shell: powershell
       run: |
-        Write-Host "===================================="
-        Write-Host "✅ USERNAME: Adysetia64"
-        Write-Host "✅ PASSWORD: Test1234!"
-        Write-Host "👉 Check your tunnel on: https://localxpose.io/dashboard/tunnels"
-        Write-Host "===================================="
+        Write-Host "This step will only run if tunnel loop exits."
