@@ -1,4 +1,4 @@
-name: Free RDP via LocalXpose (Auto-print TCP URL)
+name: Free RDP via LocalXpose (Auth-check + Auto-print)
 
 on:
   workflow_dispatch:
@@ -9,11 +9,11 @@ jobs:
     timeout-minutes: 180
 
     steps:
-    - name: 🌱 Set up user
+    - name: Set up user
       shell: powershell
       run: |
         $User="Adysetia64"
-        $PassPlain = "Test1234!"
+        $PassPlain="Test1234!"
         $secure = ConvertTo-SecureString $PassPlain -AsPlainText -Force
         if (-not (Get-LocalUser -Name $User -ErrorAction SilentlyContinue)) {
           New-LocalUser -Name $User -Password $secure -PasswordNeverExpires:$true
@@ -27,91 +27,102 @@ jobs:
         Write-Host "USER=$User" >> $env:GITHUB_ENV
         Write-Host "PASS=$PassPlain" >> $env:GITHUB_ENV
 
-    - name: 🔥 Disable Windows Firewall (All Profiles)
+    - name: Disable Windows Firewall
       shell: powershell
       run: |
         Set-NetFirewallProfile -Profile Domain,Private,Public -Enabled False
-        Write-Host "✅ Firewall disabled for all profiles."
+        Write-Host "Firewall disabled."
 
-    - name: ⬇️ Download LocalXpose (new URL)
+    - name: Download LocalXpose (new URL)
       shell: powershell
       run: |
         $url = "https://api.localxpose.io/api/downloads/loclx-windows-amd64.zip"
-        Write-Host "Downloading LocalXpose from $url ..."
+        Write-Host "Downloading $url"
         Invoke-WebRequest -Uri $url -OutFile "loclx.zip" -UseBasicParsing -ErrorAction Stop
         Expand-Archive -Path "loclx.zip" -DestinationPath "."
-        # after extraction the binary is loclx.exe (per your info)
         if (-not (Test-Path ".\loclx.exe")) {
           Write-Error "loclx.exe not found after extraction"
           exit 1
         }
-        Write-Host "✅ loclx.exe ready."
+        Write-Host "loclx.exe ready."
 
-    - name: 🔑 Authenticate LocalXpose
+    - name: Authenticate LocalXpose (check result)
       shell: powershell
       env:
         LOCALXPOSE_TOKEN: ${{ secrets.LOCALXPOSE_TOKEN }}
       run: |
         if (-not $env:LOCALXPOSE_TOKEN) {
-          Write-Error "LOCALXPOSE_TOKEN is not set in repo secrets"
+          Write-Error "LOCALXPOSE_TOKEN secret is missing or empty. Add it in repo Settings -> Secrets."
           exit 1
         }
-        .\loclx.exe account login --token $env:LOCALXPOSE_TOKEN
-        Write-Host "✅ Authenticated to LocalXpose."
 
-    - name: 🚀 Start tunnel & capture tcp:// URL (prints directly)
+        # Run login and capture output & exit code
+        $exe = (Resolve-Path ".\loclx.exe").Path
+        $authOut = ".\auth.out"
+        $authErr = ".\auth.err"
+
+        $psi = New-Object System.Diagnostics.ProcessStartInfo
+        $psi.FileName = $exe
+        $psi.Arguments = "account login --token $env:LOCALXPOSE_TOKEN"
+        $psi.RedirectStandardOutput = $true
+        $psi.RedirectStandardError  = $true
+        $psi.UseShellExecute = $false
+        $proc = [System.Diagnostics.Process]::Start($psi)
+        $proc.WaitForExit(15000)  # wait up to 15s for login
+        $out = $proc.StandardOutput.ReadToEnd()
+        $err = $proc.StandardError.ReadToEnd()
+        $out | Out-File -FilePath $authOut -Encoding utf8
+        $err | Out-File -FilePath $authErr -Encoding utf8
+
+        Write-Host "=== auth stdout ==="
+        Get-Content $authOut | ForEach-Object { Write-Host $_ }
+        Write-Host "=== auth stderr ==="
+        Get-Content $authErr | ForEach-Object { Write-Host $_ }
+
+        if ($proc.ExitCode -ne 0) {
+          Write-Error "LocalXpose login failed (exit code $($proc.ExitCode)). See auth.err above. Create a new token and set secret again."
+          exit 1
+        } else {
+          Write-Host "✅ LocalXpose login succeeded (exit code 0)."
+        }
+
+    - name: Start tunnel & capture tcp:// URL
       shell: powershell
       run: |
         $exe = (Resolve-Path ".\loclx.exe").Path
-        Write-Host "Starting: $exe tunnel tcp --to 3389"
+        Write-Host "Starting tunnel: $exe tunnel tcp --to 3389"
         $psi = New-Object System.Diagnostics.ProcessStartInfo
         $psi.FileName = $exe
         $psi.Arguments = "tunnel tcp --to 3389"
         $psi.RedirectStandardOutput = $true
         $psi.RedirectStandardError  = $true
         $psi.UseShellExecute = $false
-        $psi.CreateNoWindow = $true
-
         $proc = [System.Diagnostics.Process]::Start($psi)
 
         $stdout = ""
         $stderr = ""
         $found = $false
         $regex = [regex]"tcp://[^\s:\/]+:\d+"
-
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
         $timeoutSec = 90
 
         while (-not $proc.HasExited -and $sw.Elapsed.TotalSeconds -lt $timeoutSec) {
           Start-Sleep -Milliseconds 500
-          try {
-            $chunk = $proc.StandardOutput.ReadToEnd()
-            if ($chunk) {
-              $stdout += $chunk
-              $matches = $regex.Matches($stdout)
-              if ($matches.Count -gt 0) {
-                $url = $matches[0].Value
-                Write-Host "✅ FOUND TCP URL: $url"
-                $found = $true
-                break
-              }
-            }
-            # also check stderr just in case
-            $errchunk = $proc.StandardError.ReadToEnd()
-            if ($errchunk) {
-              $stderr += $errchunk
-            }
-          } catch {
-            # non-fatal read errors - continue
+          $chunk = $proc.StandardOutput.ReadToEnd()
+          if ($chunk) { $stdout += $chunk }
+          $matches = $regex.Matches($stdout)
+          if ($matches.Count -gt 0) {
+            $url = $matches[0].Value
+            Write-Host "✅ FOUND TCP URL: $url"
+            $found = $true
+            break
           }
+          $errchunk = $proc.StandardError.ReadToEnd()
+          if ($errchunk) { $stderr += $errchunk }
         }
 
         if (-not $found) {
-          # try one final read after process exit
-          try {
-            $stdout += $proc.StandardOutput.ReadToEnd()
-            $stderr += $proc.StandardError.ReadToEnd()
-          } catch {}
+          try { $stdout += $proc.StandardOutput.ReadToEnd(); $stderr += $proc.StandardError.ReadToEnd() } catch {}
           $matches = $regex.Matches($stdout)
           if ($matches.Count -gt 0) {
             $url = $matches[0].Value
@@ -127,20 +138,10 @@ jobs:
           Write-Host "Password: $env:PASS"
           Write-Host "Connect to: $url"
           Write-Host "========================================"
-          # keep tunnel alive until workflow stopped (optional)
-          Write-Host "Tunnel will remain running while the job is active. Stop workflow to close."
-          # Wait indefinitely so user can connect (you can ctrl-C job to stop)
-          while ($true) { Start-Sleep -Seconds 300 }
+          while ($true) { Start-Sleep -Seconds 300 }  # keep job alive
         } else {
-          Write-Host "=== STDOUT ==="
-          Write-Host $stdout
-          Write-Host "=== STDERR ==="
-          Write-Host $stderr
-          Write-Error "Timed out waiting for tcp:// URL from localxpose (timeout ${timeoutSec}s). Check token / dashboard."
+          Write-Host "=== STDOUT ==="; Write-Host $stdout
+          Write-Host "=== STDERR ==="; Write-Host $stderr
+          Write-Error "Timed out waiting for tcp:// URL from localxpose (timeout ${timeoutSec}s)."
           exit 1
         }
-
-    - name: 🧾 (never reached) Show diagnostics
-      shell: powershell
-      run: |
-        Write-Host "This step will only run if tunnel loop exits."
