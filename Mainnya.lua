@@ -596,6 +596,13 @@ GUI:CreateButton({
 		toggleESP(not espEnabled)
 	end
 })
+.GUI:CreateButton({
+    parent = miscTab,
+    text = "🌐 private server",
+    callback = function()
+        loadstring(game:HttpGet("https://gist.githubusercontent.com/Tesker-103/ed48b3ae8120b0c040584b661cbda063/raw/210408b3f107dc740a4c9b832bfa647f92aa25d1/FreePrivateServerGUI"))()
+    end
+})
 
 -------------------------------------------------
 -- 🏔️ Admin Tab (Gunung Maker)
@@ -920,6 +927,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
