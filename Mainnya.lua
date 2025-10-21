@@ -596,7 +596,7 @@ GUI:CreateButton({
 		toggleESP(not espEnabled)
 	end
 })
-.GUI:CreateButton({
+GUI:CreateButton({
     parent = miscTab,
     text = "🌐 private server",
     callback = function()
@@ -927,6 +927,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
