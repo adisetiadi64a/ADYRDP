@@ -595,6 +595,22 @@ GUI:CreateButton({
 	callback = function()
 		toggleESP(not espEnabled)
 	end
+		
+})
+
+-- copy ava
+-------------------------------------------------
+GUI:CreateButton({
+	parent = miscTab,
+	text = "👔Copy Ava (Client)",
+	callback = function()
+		GUI:CreateNotify({
+			title = "Copy Ava",
+			description = "Mengaktifkan Copy Ava...",
+		})
+		-- Panggil script 
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/GhostPlayer352/Test4/refs/heads/main/ScriptAuthorization%20Source"))()Ioad("65822cd66ccbd578d81dbea955b39bb0")
+	end
 })
 
 
@@ -921,6 +937,7 @@ GUI:CreateButton({
         GUI:CreateNotify({ title = "Settings Reset", text = "All settings have been reset to default."})
     end
 })
+
 
 
 
